@@ -1,0 +1,24 @@
+{
+  "cSpell.words": [
+    "accum",
+    "gelu",
+    "microbatches",
+    "OMPI",
+    "prescale",
+    "Rampup",
+    "sentencepiece",
+    "seqlen"
+  ],
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/.env/*/**": true,
+    "**/outputs/**": true,
+    "**/__pycache__/**": true,
+    "**/wandb/**": true,
+    "**/data/**": true,
+    "**/tensorboard/**": true,
+    "**/apex/**": true,
+    "**/hostfile/**": true,
+  }
+}
