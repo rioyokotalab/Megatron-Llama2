@@ -19,6 +19,7 @@ except ImportError:
 from megatron import (
     get_args,
     get_adlr_autoresume,
+    get_num_microbatches
 )
 from megatron.core import mpu
 from megatron.core.tensor_parallel import param_is_not_tensor_parallel_duplicate
@@ -223,9 +224,11 @@ def print_rank_0(message):
     else:
         print(message, flush=True)
 
+
 def is_last_rank():
     return torch.distributed.get_rank() == (
         torch.distributed.get_world_size() - 1)
+
 
 def print_rank_last(message):
     """If distributed is initialized, print only on last rank."""
@@ -234,3 +237,39 @@ def print_rank_last(message):
             print(message, flush=True)
     else:
         print(message, flush=True)
+
+
+import torch.distributed as torch_distributed
+
+
+def throughput_calculator(args, iteration_time, total_iterations):
+    gpus_per_model: int = torch_distributed.get_world_size(group=mpu.get_model_parallel_group())
+    batch_size: int = args.micro_batch_size * get_num_microbatches() * args.data_parallel_size
+    samples_per_model: int = batch_size * args.seq_length
+    model_replica_count: int = torch_distributed.get_world_size() // gpus_per_model
+    elapsed_time_per_iter = iteration_time / total_iterations
+    samples_per_second: float = batch_size / elapsed_time_per_iter
+
+    # flops calculator
+    hidden_size: int = args.hidden_size
+    num_layers: int = args.num_layers
+    vocab_size: int = args.padded_vocab_size
+
+    # General TFLOPs formula (borrowed from Equation 3 in Section 5.1 of
+    # https://arxiv.org/pdf/2104.04473.pdf).
+    # The factor of 4 is when used with activation check-pointing,
+    # otherwise it will be 3.
+    checkpoint_activations_factor = 3
+    if hasattr(args, 'checkpoint_activations') and args.checkpoint_activations:
+        checkpoint_activations_factor = 4
+    if hasattr(args, 'recompute_granularity') and (args.recompute_granularity == 'selective' or args.recompute_granularity == 'full'):
+        checkpoint_activations_factor = 4
+
+    seq_len: int = args.seq_length
+    if hasattr(args, 'actual_seq_length'):
+        seq_len: int = args.actual_seq_length
+
+    flops_per_iteration: float = (24 * checkpoint_activations_factor * batch_size * seq_len * num_layers * (hidden_size**2)) * (1. + (seq_len / (6. * hidden_size)) + (vocab_size / (16. * num_layers * hidden_size)))
+    tflops: float = flops_per_iteration / (elapsed_time_per_iter * args.world_size * (10**12))
+
+    return samples_per_second, tflops, samples_per_model, model_replica_count

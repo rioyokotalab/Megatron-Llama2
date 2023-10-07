@@ -2,6 +2,7 @@
 
 """Megatron initialization."""
 
+import argparse
 import random
 import os
 import time
@@ -41,7 +42,7 @@ def initialize_megatron(
         assert torch.cuda.is_available(), "Megatron requires CUDA."
 
     # Parse arguments
-    args = parse_args(extra_args_provider, ignore_unknown_args)
+    args: argparse.Namespace = parse_args(extra_args_provider, ignore_unknown_args)
 
     if args.use_checkpoint_args or args_defaults.get("use_checkpoint_args", False):
         assert args.load is not None, "--use-checkpoints-args requires --load argument"

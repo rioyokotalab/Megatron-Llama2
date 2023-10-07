@@ -4,6 +4,7 @@
 
 import argparse
 import dataclasses
+from email.policy import default
 import json
 import os
 import torch
@@ -16,10 +17,11 @@ from tools.retro.utils import get_args_path as get_retro_args_path
 from megatron.core.transformer import TransformerConfig
 
 
-def parse_args(extra_args_provider=None, ignore_unknown_args=False):
+def parse_args(extra_args_provider=None, ignore_unknown_args=False) -> argparse.Namespace:
     """Parse all arguments."""
-    parser = argparse.ArgumentParser(description='Megatron-LM Arguments',
-                                     allow_abbrev=False)
+    parser: argparse.ArgumentParser = argparse.ArgumentParser(
+        description='Megatron-LM Arguments', allow_abbrev=False
+    )
 
     # Standard arguments.
     parser = _add_network_size_args(parser)
@@ -51,11 +53,21 @@ def parse_args(extra_args_provider=None, ignore_unknown_args=False):
     else:
         args = parser.parse_args()
 
-    # Args from environment
+    # Distributed args.
+    if args.use_mpi:
+        global_rank = int(os.getenv('OMPI_COMM_WORLD_RANK', 0))
+        local_rank = int(os.getenv('OMPI_COMM_WORLD_LOCAL_RANK', 0))
+        world_size = int(os.getenv('OMPI_COMM_WORLD_SIZE', 1))
+
+        os.environ['RANK'] = str(global_rank)
+        os.environ['LOCAL_RANK'] = str(local_rank)
+        os.environ['WORLD_SIZE'] = str(world_size)
+
     args.rank = int(os.getenv('RANK', '0'))
     args.world_size = int(os.getenv("WORLD_SIZE", '1'))
 
     return args
+
 
 def validate_args(args, defaults={}):
     # Tensor model parallel size.
@@ -788,7 +800,29 @@ def _add_training_args(parser):
                        help='Gloable step to stop profiling.')
     group.add_argument('--profile-ranks', nargs='+', type=int, default=[0],
                        help='Global ranks to profile.')
-
+    group.add_argument(
+        "--wandb-entity",
+        type=str,
+        default=None,
+    )
+    group.add_argument(
+        "--wandb-name",
+        type=str,
+        default=None,
+    )
+    group.add_argument(
+        "--wandb-project",
+        type=str,
+        default=None
+    )
+    group.add_argument(
+        "--wandb-id",
+        type=str,
+        default=None,
+    )
+    group.add_argument(
+        "--use-mpi", action="store_true", default=False,
+    )
 
     # deprecated
     group.add_argument('--checkpoint-activations', action='store_true',
