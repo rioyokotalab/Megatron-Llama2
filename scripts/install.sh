@@ -31,3 +31,8 @@ pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation -
 
 # flash-attention install
 pip install flash-attn==2.3.0 --no-build-isolation
+
+# huggingface install
+pip install transformers==4.32.0
+
+pip install accelerate

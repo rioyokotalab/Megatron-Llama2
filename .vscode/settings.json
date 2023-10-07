@@ -7,7 +7,8 @@
     "prescale",
     "Rampup",
     "sentencepiece",
-    "seqlen"
+    "seqlen",
+    "tflops"
   ],
   "files.watcherExclude": {
     "**/.git/objects/**": true,
@@ -20,5 +21,9 @@
     "**/tensorboard/**": true,
     "**/apex/**": true,
     "**/hostfile/**": true,
-  }
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "python.formatting.provider": "none"
 }
