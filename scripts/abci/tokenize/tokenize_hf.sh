@@ -27,7 +27,7 @@ for ((i = 0; i <= 37; i++)); do
 
   python tools/preprocess_data.py \
     --input ${INPUT_FILE} \
-    --output-prefix ${OUTPUT_DIR}/ja_cc \
+    --output-prefix ${OUTPUT_DIR}/ja_cc_${i} \
     --tokenizer-type Llama2Tokenizer \
     --tokenizer-model /bb/llm/gaf51275/jalm/jalm-tokenizer-private/tokenizer/jalm_llama_clueweb/merged_tokenizer_hf/tokenizer.model \
     --append-eod \
