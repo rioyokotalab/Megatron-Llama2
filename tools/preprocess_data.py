@@ -1,6 +1,6 @@
 # Copyright (c) 2022, NVIDIA CORPORATION. All rights reserved.
 
-"""Processing large data for pretraining."""
+"""Processing large data for pre training."""
 import argparse
 import math
 import json
@@ -11,8 +11,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
 import time
 import gzip
 import glob
-import torch
-import numpy as np
 import multiprocessing
 try:
     import nltk
@@ -22,10 +20,11 @@ except ImportError:
 
 from megatron.tokenizer import build_tokenizer
 from megatron.data import indexed_dataset
+from typing import Any
 
 
 # https://stackoverflow.com/questions/33139531/preserve-empty-lines-with-nltks-punkt-tokenizer
-class CustomLanguageVars(nltk.tokenize.punkt.PunktLanguageVars):
+class CustomLanguageVars(nltk.tokenize.punkt.PunktLanguageVars):  # type: ignore
 
     _period_context_fmt = r"""
         \S*                          # some word material
@@ -36,6 +35,7 @@ class CustomLanguageVars(nltk.tokenize.punkt.PunktLanguageVars):
             |
             (?P<next_tok>\S+)     #  <-- Normally you would have \s+ here
         ))"""
+
 
 class IdentitySplitter(object):
     def tokenize(self, *text):
@@ -71,20 +71,24 @@ class Encoder(object):
         else:
             Encoder.splitter = IdentitySplitter()
 
-    def split(self, json_line):
-        data = json.loads(json_line)
-        output = {}
-        for key in self.args.json_keys:
+    def split(self, json_line) -> tuple[str, int]:
+        data: dict[str, Any] = json.loads(json_line)
+        output: dict[str, Any] = {}
+
+        for key in self.args.json_keys:  # default ["text"]
             text = data[key]
             max_len = 1000000
-            tokens_list = [Encoder.splitter.tokenize(text[i:i+max_len]) for i in range(0, len(text), max_len)]
+            tokens_list = [
+                Encoder.splitter.tokenize(text[i:i + max_len]) for i in range(0, len(text), max_len)]
             output[key] = [tokens for partial in tokens_list for tokens in partial]
         return json.dumps(output), len(json_line)
 
-    def encode(self, json_line):
-        data = json.loads(json_line)
-        ids = {}
-        lens = {}
+    def encode(self, json_line) -> tuple[dict[str, Any], dict[str, Any], int, int]:
+        data: dict[str, Any] = json.loads(json_line)
+        ids: dict[str, Any] = {}
+        lens: dict[str, Any] = {}
+        num_tokens: int = 0
+
         for key in self.args.json_keys:
             text = data[key]
             if isinstance(text, list):
@@ -95,15 +99,17 @@ class Encoder(object):
             sentence_lens = []
             for sentence in sentences:
                 sentence_ids = Encoder.tokenizer.tokenize(sentence)
-                if len(sentence_ids) > 0:
-                    doc_ids.extend(sentence_ids)
-                    sentence_lens.append(len(sentence_ids))
+                if len(sentence_ids) > 0:  # type: ignore
+                    doc_ids.extend(sentence_ids)  # type: ignore
+                    sentence_lens.append(len(sentence_ids))  # type: ignore
+                    num_tokens += len(sentence_ids)  # type: ignore
             if len(doc_ids) > 0 and self.args.append_eod:
                 doc_ids.append(Encoder.tokenizer.eod)
                 sentence_lens[-1] += 1
+                num_tokens += 1
             ids[key] = doc_ids
             lens[key] = sentence_lens
-        return ids, lens, len(json_line)
+        return ids, lens, len(json_line), num_tokens
 
 
 class Partition(object):
@@ -111,16 +117,17 @@ class Partition(object):
         self.args = args
         self.workers = workers
 
-    def print_processing_stats(self, count, proc_start, total_bytes_processed):
+    def print_processing_stats(self, count, proc_start, total_bytes_processed, total_tokens_processed):
         if count % self.args.log_interval == 0:
             current = time.time()
             elapsed = current - proc_start
-            mbs = total_bytes_processed/elapsed/1024/1024
+            mbs = total_bytes_processed / elapsed / 1024 / 1024
             print(f"Processed {count} documents",
+                  f"total tokens processed {total_tokens_processed}"
                   f"({count/elapsed} docs/s, {mbs} MB/s).",
                   file=sys.stderr)
 
-    def split_sentences(self, file_name):
+    def split_sentences(self, file_name) -> None:
         input_file_name, output_file_name = file_name
         print("Opening", input_file_name)
         fin = open(input_file_name, 'r', encoding='utf-8')
@@ -132,16 +139,16 @@ class Partition(object):
 
         proc_start = time.time()
         total_bytes_processed = 0
+        total_tokens_processed = 0
         for i, (doc, bytes_processed) in enumerate(split_docs, start=1):
             total_bytes_processed += bytes_processed
             fout.write(doc + "\n")
-            self.print_processing_stats(i, proc_start, total_bytes_processed)
+            self.print_processing_stats(i, proc_start, total_bytes_processed, total_tokens_processed)
 
         fin.close()
         fout.close()
 
-
-    def process_json_file(self, file_name):
+    def process_json_file(self, file_name) -> None:
         input_file_name, output_prefix = file_name
         print("Opening", input_file_name)
         fin = open(input_file_name, 'r', encoding='utf-8')
@@ -173,18 +180,22 @@ class Partition(object):
         startup_end = time.time()
         proc_start = time.time()
         total_bytes_processed = 0
+        total_tokens_processed = 0
+
         print("Time to startup:", startup_end - startup_start)
-        for i, (doc, sentence_lens, bytes_processed) in enumerate(encoded_docs, start=1):
+        for i, (doc, sentence_lens, bytes_processed, tokens_processed) in enumerate(encoded_docs, start=1):
             total_bytes_processed += bytes_processed
+            total_tokens_processed += tokens_processed
             for key in doc.keys():
                 builders[key].add_doc(doc[key], sentence_lens[key])
-            self.print_processing_stats(i, proc_start, total_bytes_processed)
+            self.print_processing_stats(i, proc_start, total_bytes_processed, total_tokens_processed)
 
         fin.close()
         builders[key].finalize(output_idx_files[key])
+        print(f"Processed Total {total_tokens_processed} tokens", file=sys.stderr)
 
 
-def get_args():
+def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     group = parser.add_argument_group(title='input data')
     group.add_argument('--input', type=str, required=True,
@@ -224,8 +235,7 @@ def get_args():
                        help=('Number of worker processes to launch.'
                              'A good default for fast pre-processing '
                              'is: (workers * partitions) = available CPU cores.'))
-    group.add_argument('--partitions', type=int, default=1,
-                        help='Number of file partitions')
+    group.add_argument('--partitions', type=int, default=1, help='Number of file partitions')
     group.add_argument('--log-interval', type=int, default=1000,
                        help='Interval between progress updates')
     group.add_argument('--keep-sequential-samples', action='store_true',
@@ -246,7 +256,7 @@ def get_args():
     return args
 
 
-def get_file_name(args, file_id):
+def get_file_name(args, file_id) -> dict[str, Any]:
     file_name, extension = os.path.splitext(args.input)
     input_file_name = file_name + "_" + str(file_id) + extension
     sentence_split_file = file_name + "_ss_" + str(file_id) + extension
@@ -258,19 +268,19 @@ def get_file_name(args, file_id):
     return file_names
 
 
-def check_files_exist(in_ss_out_names, key, num_partitions):
+def check_files_exist(in_ss_out_names, key, num_partitions) -> bool:
     for i in range(num_partitions):
         if not os.path.exists(in_ss_out_names[i][key]):
             return False
     return True
 
 
-def main():
+def main() -> None:
     args = get_args()
 
     if args.split_sentences:
         if nltk_available:
-            nltk.download("punkt", quiet=True, download_dir=os.environ.get("NLTK_DATA"))
+            nltk.download("punkt", quiet=True, download_dir=os.environ.get("NLTK_DATA"))  # type: ignore
         else:
             raise Exception(
                 "nltk library required for sentence splitting is not available.")
@@ -294,18 +304,18 @@ def main():
                 with open(filename, "r") as fin:
                     for fc, _ in enumerate(fin):
                         pass
-                total_sample_count += (fc + 1)
+                total_sample_count += (fc + 1)  # type: ignore
             partition_size = math.ceil(total_sample_count / args.partitions)
 
-        # create .jsonl parition files
+        # create .jsonl partition files
         for idx in range(args.partitions):
             in_ss_out_name = get_file_name(args, idx)
             in_ss_out_names.append(in_ss_out_name)
 
-        # check to see if paritions were already created
+        # check to see if partitions were already created
         partitions_present = check_files_exist(in_ss_out_names, 'partition', args.partitions)
 
-        # check to see if paritions with split sentences already created
+        # check to see if partitions with split sentences already created
         split_sentences_present = check_files_exist(in_ss_out_names, 'sentence_split', args.partitions)
 
         if not partitions_present and not split_sentences_present:
@@ -316,7 +326,9 @@ def main():
                 partitioned_input_files.append(partitioned_input_file)
 
             index = 0
-            if args.keep_sequential_samples: line_count = 0
+            if args.keep_sequential_samples:
+                line_count = 0
+
             for in_file_name in in_file_names:
                 # support for gzip files
                 if in_file_name.endswith(".gz"):
@@ -327,11 +339,11 @@ def main():
                 for line in fin:
                     partitioned_input_files[index].write(line)
                     if args.keep_sequential_samples:
-                        line_count += 1
-                        if line_count % partition_size == 0:
+                        line_count += 1  # type: ignore
+                        if line_count % partition_size == 0:  # type: ignore
                             index += 1
                     else:
-                        index = (index + 1)%args.partitions
+                        index = (index + 1) % args.partitions
 
                 fin.close()
 
@@ -339,9 +351,9 @@ def main():
                 partitioned_input_files[idx].close()
 
     assert args.workers % args.partitions == 0
-    partition = Partition(args, args.workers//args.partitions)
+    partition = Partition(args, args.workers // args.partitions)
 
-    # check to see if paritions with split sentences already created
+    # check to see if partitions with split sentences already created
     split_sentences_present = check_files_exist(in_ss_out_names, 'sentence_split', args.partitions)
 
     # split sentences in partition files
@@ -358,7 +370,6 @@ def main():
 
         if args.partitions == 1:
             return
-
 
     # encode partition files in parallel
     processes = []
@@ -396,14 +407,12 @@ def main():
         )
 
         for name in in_ss_out_names:
-            parition_output_prefix = name['output_prefix']
-            full_partition_output_prefix = "{}_{}_{}".format(parition_output_prefix,
+            partition_output_prefix = name['output_prefix']
+            full_partition_output_prefix = "{}_{}_{}".format(partition_output_prefix,
                                                              key, level)
             builders[key].merge_file_(full_partition_output_prefix)
         builders[key].finalize(output_idx_files[key])
 
 
 if __name__ == '__main__':
-
     main()
-

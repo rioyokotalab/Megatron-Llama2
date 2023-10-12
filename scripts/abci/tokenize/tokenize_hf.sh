@@ -17,7 +17,7 @@ cd /bb/llm/gaf51275/llama/Megatron-LM
 source .env/bin/activate
 
 DATASET_DIR=/bb/llm/gaf51275/llama/datasets/llama2-llm-jp-corpus/v1.0.2/sample
-OUTPUT_DIR=/bb/llm/gaf51275/llama/datasets/llama2-llm-jp-corpus/v1.0.2/tokenized/hf
+OUTPUT_DIR=/bb/llm/gaf51275/llama/datasets/llama2-llm-jp-corpus/v1.0.2/tokenized/llama-2-hf-tokenizer
 
 mkdir -p ${OUTPUT_DIR}
 
@@ -29,7 +29,7 @@ for ((i = 0; i <= 37; i++)); do
     --input ${INPUT_FILE} \
     --output-prefix ${OUTPUT_DIR}/ja_cc_${i} \
     --tokenizer-type Llama2Tokenizer \
-    --tokenizer-model /bb/llm/gaf51275/jalm/jalm-tokenizer-private/tokenizer/jalm_llama_clueweb/merged_tokenizer_hf/tokenizer.model \
+    --tokenizer-model /bb/llm/gaf51275/llama/huggingface-checkpoint/Llama-2-7b-hf/tokenizer.model \
     --append-eod \
     --workers 64
 done
@@ -39,6 +39,6 @@ python tools/preprocess_data.py \
   --input ${DATASET_DIR}/ja_wiki/merged_train_0.jsonl \
   --output-prefix ${OUTPUT_DIR}/ja_wiki \
   --tokenizer-type Llama2Tokenizer \
-  --tokenizer-model /bb/llm/gaf51275/jalm/jalm-tokenizer-private/tokenizer/jalm_llama_clueweb/merged_tokenizer_hf/tokenizer.model \
+  --tokenizer-model /bb/llm/gaf51275/llama/huggingface-checkpoint/Llama-2-7b-hf/tokenizer.model \
   --append-eod \
   --workers 64
