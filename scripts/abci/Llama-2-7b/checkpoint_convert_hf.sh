@@ -34,7 +34,7 @@ python tools/checkpoint/util.py \
   --model-type GPT \
   --loader llama2_hf \
   --saver megatron \
-  --target-tensor-parallel-size 1 \
+  --target-tensor-parallel-size ${TENSOR_PARALLEL_SIZE} \
   --target-pipeline-parallel-size ${PIPELINE_PARALLEL_SIZE} \
   --load-dir ${HF_CHECKPOINT_DIR} \
   --save-dir ${MEGATRON_CHECKPOINT_DIR} \
