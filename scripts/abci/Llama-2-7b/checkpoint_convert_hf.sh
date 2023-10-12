@@ -16,21 +16,26 @@ module load hpcx/2.12
 cd /bb/llm/gaf51275/llama/Megatron-LM
 source .env/bin/activate
 
+# distributed settings
+TENSOR_PARALLEL_SIZE=1   # fixed
+PIPELINE_PARALLEL_SIZE=8 # num layers 32: Llama-2 7B
+
 # model config
 HF_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/huggingface-checkpoint/Llama-2-7b-hf
-MEGATRON_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-7b
+MEGATRON_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-7b/tp1-pp${PIPELINE_PARALLEL_SIZE}
 
 mkdir -p ${MEGATRON_CHECKPOINT_DIR}
 
 # tokenizer config
-TOKENIZER_MODEL=/bb/llm/gaf51275/jalm/jalm-tokenizer-private/tokenizer/jalm_llama_clueweb/merged_tokenizer_hf
+TOKENIZER_MODEL=/bb/llm/gaf51275/llama/huggingface-checkpoint/Llama-2-7b-hf/tokenizer.model
 
 # convert
 python tools/checkpoint/util.py \
   --model-type GPT \
   --loader llama2_hf \
-  --save megatron \
+  --saver megatron \
   --target-tensor-parallel-size 1 \
+  --target-pipeline-parallel-size ${PIPELINE_PARALLEL_SIZE} \
   --load-dir ${HF_CHECKPOINT_DIR} \
   --save-dir ${MEGATRON_CHECKPOINT_DIR} \
   --tokenizer-model ${TOKENIZER_MODEL}
