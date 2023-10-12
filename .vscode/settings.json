@@ -8,7 +8,9 @@
     "Rampup",
     "sentencepiece",
     "seqlen",
-    "tflops"
+    "tensorstore",
+    "tflops",
+    "zarr"
   ],
   "files.watcherExclude": {
     "**/.git/objects/**": true,
@@ -24,6 +26,5 @@
   },
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter"
-  },
-  "python.formatting.provider": "none"
+  }
 }

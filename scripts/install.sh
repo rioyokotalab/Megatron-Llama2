@@ -36,3 +36,8 @@ pip install flash-attn==2.3.0 --no-build-isolation
 pip install transformers==4.32.0
 
 pip install accelerate
+
+# distributed checkpointing
+pip install zarr
+
+pip install tensorstore
