@@ -22,7 +22,7 @@ PIPELINE_PARALLEL_SIZE=8 # num layers 32: Llama-2 7B
 
 # model config
 HF_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/huggingface-checkpoint/Llama-2-7b-hf
-MEGATRON_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-7b/tp1-pp${PIPELINE_PARALLEL_SIZE}
+MEGATRON_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-7b/tp${TENSOR_PARALLEL_SIZE}-pp${PIPELINE_PARALLEL_SIZE}
 
 mkdir -p ${MEGATRON_CHECKPOINT_DIR}
 
