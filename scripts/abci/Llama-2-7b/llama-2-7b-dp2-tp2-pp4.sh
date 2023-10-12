@@ -84,17 +84,19 @@ for ((i = 0; i <= 10; i++)); do
   DATA_PATH="${DATA_PATH} 1 ${DATASET_DIR}/ja_cc_${i}_text_document"
 done
 
-
 # job name
 JOB_NAME="llama-2-7b-${NODE_TYPE}-${NUM_NODES}node-${NUM_GPUS}gpu-${SEQ_LENGTH}s-DP=${DATA_PARALLEL_SIZE}-TP=${TENSOR_PARALLEL_SIZE}-PP=${PIPELINE_PARALLEL_SIZE}-BS=${GLOBAL_BATCH_SIZE}-LR=${LR}-MINLR=${MIN_LR}-WARMUP=${LR_WARMUP_STEPS}-WD=${WEIGHT_DECAY}-GC=${GRAD_CLIP}"
 
-# 注意
-# 初回実行時と、実行再開時で挙動を変える必要がある
-# 初回実行時: --load には、HuggingFace のモデルを変換したチェックポイントを指定する
-# 実行再開時: --load には、Megatron-LM のチェックポイントを指定する
-# no-load-rng, no-load-optim は、初回実行時のみ指定する
-
 # --norm-epsilon 1e-5 : conifg.json (RMS norm)
+
+# checkpoint load
+if [[ -f "${CHECKPOINT_SAVE_DIR}/latest_checkpointed_iteration.txt" ]]; then
+  # resume training
+  CHECKPOINT_ARGS="--load ${CHECKPOINT_SAVE_DIR}"
+else
+  # first training
+  CHECKPOINT_ARGS="--load ${CHECKPOINT_DIR} --no-load-rng --no-load-optim"
+fi
 
 # run
 mpirun -np $NUM_GPUS \
@@ -122,7 +124,7 @@ mpirun -np $NUM_GPUS \
   --tokenizer-type Llama2Tokenizer \
   --tokenizer-model ${TOKENIZER_MODEL} \
   --use-checkpoint-args \
-  --load ${CHECKPOINT_DIR} \
+  ${CHECKPOINT_ARGS} \
   --save ${CHECKPOINT_SAVE_DIR} \
   --data-path ${DATA_PATH} \
   --split 949,50,1 \
@@ -141,8 +143,6 @@ mpirun -np $NUM_GPUS \
   --save-interval 100 \
   --eval-interval 100 \
   --eval-iters 10 \
-  --no-load-optim \
-  --no-load-rng \
   --bf16 \
   --untie-embeddings-and-output-weights \
   --use-rotary-position-embeddings \
@@ -156,7 +156,7 @@ mpirun -np $NUM_GPUS \
   --swiglu \
   --use-flash-attn \
   --recompute-activations \
-  --recompute-granularity full \
+  --recompute-granularity "selective" \
   --use-mpi \
   --wandb-name ${JOB_NAME} \
   --wandb-project "megatron-lm-llama" \
