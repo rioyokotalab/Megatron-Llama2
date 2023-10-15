@@ -30,7 +30,7 @@ git checkout 50ac8425403b98147cbb66aea9a2a27dd3fe7673
 pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation --config-settings "--build-option=--cpp_ext" --config-settings "--build-option=--cuda_ext" ./
 
 # flash-attention install
-pip install flash-attn==2.3.0 --no-build-isolation
+pip install flash-attn==2.3.2 --no-build-isolation
 
 # huggingface install
 pip install transformers==4.32.0
