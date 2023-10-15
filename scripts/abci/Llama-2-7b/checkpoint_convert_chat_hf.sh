@@ -17,12 +17,12 @@ cd /bb/llm/gaf51275/llama/Megatron-LM
 source .env/bin/activate
 
 # distributed settings
-TENSOR_PARALLEL_SIZE=1   # fixed
-PIPELINE_PARALLEL_SIZE=8 # num layers 32: Llama-2 7B
+TENSOR_PARALLEL_SIZE=2   # fixed
+PIPELINE_PARALLEL_SIZE=4 # num layers 32: Llama-2 7B
 
 # model config
 HF_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/huggingface-checkpoint/Llama-2-7b-chat-hf
-MEGATRON_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-7b-chat/tp1-pp${PIPELINE_PARALLEL_SIZE}
+MEGATRON_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-7b-chat/tp${TENSOR_PARALLEL_SIZE}-pp${PIPELINE_PARALLEL_SIZE}
 
 mkdir -p ${MEGATRON_CHECKPOINT_DIR}
 
@@ -34,7 +34,7 @@ python tools/checkpoint/util.py \
   --model-type GPT \
   --loader llama2_hf \
   --saver megatron \
-  --target-tensor-parallel-size 1 \
+  --target-tensor-parallel-size ${TENSOR_PARALLEL_SIZE} \
   --target-pipeline-parallel-size ${PIPELINE_PARALLEL_SIZE} \
   --load-dir ${HF_CHECKPOINT_DIR} \
   --save-dir ${MEGATRON_CHECKPOINT_DIR} \
