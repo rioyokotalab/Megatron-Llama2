@@ -147,7 +147,7 @@ mpirun -np $NUM_GPUS \
   --untie-embeddings-and-output-weights \
   --use-rotary-position-embeddings \
   --normalization RMSNorm \
-  --norm-epsilon 1e-5 \
+  --norm-epsilon 1e-6 \
   --no-position-embedding \
   --no-masked-softmax-fusion \
   --no-query-key-layer-scaling \
