@@ -2,14 +2,21 @@
   "cSpell.words": [
     "accum",
     "gelu",
+    "huggingface",
+    "layernorm",
     "microbatches",
     "OMPI",
     "prescale",
+    "pretraining",
     "Rampup",
     "sentencepiece",
     "seqlen",
+    "sharded",
+    "silu",
+    "swiglu",
     "tensorstore",
     "tflops",
+    "wqkv",
     "zarr"
   ],
   "files.watcherExclude": {
