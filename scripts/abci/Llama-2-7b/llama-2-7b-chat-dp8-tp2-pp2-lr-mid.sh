@@ -63,7 +63,7 @@ GLOBAL_BATCH_SIZE=1024
 TRAIN_STEPS=25000 # e.g. llama: 1T tokens / 4M tokens_per_batch = 250000 steps
 # 今回は約100B Tokensなので 1/10
 
-LR=3e-5
+LR=1.0e-4
 MIN_LR=1e-5
 LR_WARMUP_STEPS=1000
 WEIGHT_DECAY=0.1
@@ -72,7 +72,7 @@ GRAD_CLIP=1
 # model config
 TOKENIZER_MODEL=/bb/llm/gaf51275/llama/huggingface-checkpoint/Llama-2-7b-chat-hf/tokenizer.model
 CHECKPOINT_DIR=/bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-7b-chat/tp${TENSOR_PARALLEL_SIZE}-pp${PIPELINE_PARALLEL_SIZE}
-CHECKPOINT_SAVE_DIR=/bb/llm/gaf51275/llama/checkpoints/llama-2-7b-chat-megatron/tp${TENSOR_PARALLEL_SIZE}-pp${PIPELINE_PARALLEL_SIZE}-lr-low
+CHECKPOINT_SAVE_DIR=/bb/llm/gaf51275/llama/checkpoints/llama-2-7b-chat-megatron/tp${TENSOR_PARALLEL_SIZE}-pp${PIPELINE_PARALLEL_SIZE}-lr-mid
 
 mkdir -p ${CHECKPOINT_SAVE_DIR}
 
@@ -161,7 +161,7 @@ mpirun -np $NUM_GPUS \
   --untie-embeddings-and-output-weights \
   --use-rotary-position-embeddings \
   --normalization RMSNorm \
-  --norm-epsilon 1e-6 \
+  --norm-epsilon 1e-5 \
   --no-position-embedding \
   --no-masked-softmax-fusion \
   --no-query-key-layer-scaling \
