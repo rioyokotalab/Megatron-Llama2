@@ -18,19 +18,19 @@ source .env/bin/activate
 
 # distributed settings
 TARGET_TENSOR_PARALLEL_SIZE=1   # fixed
-TARGET_PIPELINE_PARALLEL_SIZE=1 # num layers 32: Llama-2 7B
+TARGET_PIPELINE_PARALLEL_SIZE=1 # fixed
 
-BASE_TENSOR_PARALLEL_SIZE=2
-BASE_PIPELINE_PARALLEL_SIZE=2
+BASE_TENSOR_PARALLEL_SIZE=8
+BASE_PIPELINE_PARALLEL_SIZE=8
 
 # model config
-BASE_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-7b-chat/tp${BASE_TENSOR_PARALLEL_SIZE}-pp${BASE_PIPELINE_PARALLEL_SIZE}
-TARGET_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-7b-chat/tp${TARGET_TENSOR_PARALLEL_SIZE}-pp${TARGET_PIPELINE_PARALLEL_SIZE}
+BASE_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-70b/tp${BASE_TENSOR_PARALLEL_SIZE}-pp${BASE_PIPELINE_PARALLEL_SIZE}
+TARGET_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-70b/tp${TARGET_TENSOR_PARALLEL_SIZE}-pp${TARGET_PIPELINE_PARALLEL_SIZE}
 
 mkdir -p ${TARGET_CHECKPOINT_DIR}
 
 # tokenizer config
-TOKENIZER_MODEL=/bb/llm/gaf51275/llama/huggingface-checkpoint/Llama-2-7b-chat-hf/tokenizer.model
+TOKENIZER_MODEL=/bb/llm/gaf51275/llama/huggingface-checkpoint/Llama-2-70b-hf/tokenizer.model
 
 # convert
 python tools/checkpoint/util.py \
