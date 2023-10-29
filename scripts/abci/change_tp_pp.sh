@@ -5,6 +5,8 @@
 #$ -o outputs/change_tp_pp/
 #$ -cwd
 
+set -e
+
 # module load
 source /etc/profile.d/modules.sh
 module load cuda/11.8/11.8.0
