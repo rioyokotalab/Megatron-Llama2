@@ -16,9 +16,13 @@ module load hpcx/2.12
 cd /bb/llm/gaf51275/llama/Megatron-LM
 source .env/bin/activate
 
+# TP > 1, PP > 1の場合は、TP=1, PP=1になるように scripts/abci/change_tp_pp.sh を実行してからconvertしてください
+BASE_TENSOR_PARALLEL_SIZE=1  # fixed
+BASE_PIPELINE_PARALLEL_SIZE=1 # fixed
+
 python scripts/abci/megatron_to_hf/llama_checkpoint_conversion.py \
   --convert_checkpoint_from_megatron_to_transformers \
-  --load_path /bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-7b-chat/tp1-pp1 \
+  --load_path /bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-7b-chat/tp${BASE_TENSOR_PARALLEL_SIZE}-pp${BASE_PIPELINE_PARALLEL_SIZE} \
   --save_path /bb/llm/gaf51275/llama/huggingface-checkpoint/Llama-2-7b-chat-megatron \
   --target_params_dtype "fp16" \
   --print-checkpoint-structure \
