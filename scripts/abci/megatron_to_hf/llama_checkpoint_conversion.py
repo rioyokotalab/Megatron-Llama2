@@ -297,7 +297,7 @@ def permute_qkv(
 
 
 def convert_wqkv(
-    qkv_w: torch.Tensor, layer_idx: int = 0, n_heads: int = 32, n_heads_kv: int = 8
+    qkv_w: torch.Tensor, layer_idx: int = 0, n_heads: int = 32, n_heads_kv: int = 8, tp_size: int = 1,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     """
     llama-2
@@ -313,7 +313,7 @@ def convert_wqkv(
         tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     """
     n_hidden = qkv_w.size(1)
-    hidden_dim = n_hidden // n_heads
+    hidden_dim: int = n_hidden // n_heads * tp_size
     # qkv_w = permute_qkv(qkv_w, n_hidden, n_heads, n_heads_kv, revert=True)
 
     n_qs_per_kv: int = n_heads // n_heads_kv
@@ -515,24 +515,11 @@ def convert_checkpoint_from_megatron_to_transformers(args: argparse.Namespace) -
             # Split QKV packed weights
             elif op_name == "self_attention.query_key_value" and weight_or_bias == "weight":
                 print(f"DEBUG: key:{key}, params: {params.shape}")
-                # tensor_shape = params[0].shape
-
-                # wq = torch.empty((0, *tensor_shape[1:]))
-                # wk = torch.empty((0, *tensor_shape[1:]))
-                # wv = torch.empty((0, *tensor_shape[1:]))
-
-                # for i, tensor in enumerate(params):
-                #     tensor = tensor.reshape(1, megatron_args.hidden_size)
-                #     if i % 3 == 0:
-                #         wq = torch.cat([wq, tensor], dim=0)
-                #     elif i % 3 == 1:
-                #         wk = torch.cat([wk, tensor], dim=0)
-                #     else:
-                #         wv = torch.cat([wv, tensor], dim=0)
 
                 wq, wk, wv = convert_wqkv(
                     qkv_w=params, layer_idx=layer_idx, n_heads=config.num_attention_heads,
-                    n_heads_kv=config.num_attention_heads  # TODO: 要検証
+                    n_heads_kv=megatron_args.num_query_groups if megatron_args.group_query_attention else config.num_attention_heads,
+                    tp_size=tp_size
                 )
 
                 output_state_dict[layer_name + ".self_attn.q_proj.weight"] = wq.to(dtype).clone().detach().contiguous()
