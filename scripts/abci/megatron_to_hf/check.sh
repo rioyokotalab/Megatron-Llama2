@@ -16,4 +16,6 @@ module load hpcx/2.12
 cd /bb/llm/gaf51275/llama/Megatron-LM
 source .env/bin/activate
 
-python scripts/abci/megatron_to_hf/check.py
+python scripts/abci/megatron_to_hf/check.py \
+  --base-hf-model-path /bb/llm/gaf51275/llama/huggingface-checkpoint/Llama-2-7b-chat-hf \
+  --converted_hf_model_path /bb/llm/gaf51275/llama/huggingface-checkpoint/Llama-2-7b-chat-megatron

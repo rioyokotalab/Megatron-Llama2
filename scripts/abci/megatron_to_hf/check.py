@@ -1,5 +1,6 @@
 from transformers import LlamaForCausalLM
 import torch
+import argparse
 
 
 def compare_state_dicts(original_state_dict, converted_state_dict):
@@ -20,13 +21,18 @@ def compare_state_dicts(original_state_dict, converted_state_dict):
     return differences
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--base-hf-model-path", type=str, required=True)
+parser.add_argument("--converted-hf-model-path", type=str, required=True)
+args = parser.parse_args()
+
 # モデルをロード
 original_model = LlamaForCausalLM.from_pretrained(
-    "/bb/llm/gaf51275/llama/huggingface-checkpoint/Llama-2-7b-chat-hf",
+    args.base_hf_model_path,
     device_map="cpu"
 )
 converted_model = LlamaForCausalLM.from_pretrained(
-    "/bb/llm/gaf51275/llama/huggingface-checkpoint/Llama-2-7b-chat-megatron",
+    args.converted_hf_model_path,
     device_map="cpu"
 )
 
@@ -47,4 +53,3 @@ for key, values in diffs.items():
         print(f"  converted 2 Value (Shape {values[1].shape}):\n{values[1]}")
     else:
         print(f"  {values[0]}")
-
