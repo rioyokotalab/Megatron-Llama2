@@ -4,7 +4,6 @@
 
 import argparse
 import dataclasses
-from email.policy import default
 import json
 import os
 import torch
