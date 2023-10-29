@@ -123,7 +123,7 @@ def add_transformers_checkpoint_args(parser):
     parser.add_argument(
         "--max_shard_size",
         type=str,
-        default="10GB",
+        default="8GB",
         help=(
             "The maximum size for a checkpoint before being sharded. Checkpoints shard will then be each of size "
             "lower than this size. If expressed as a string, needs to be digits followed by a unit (like `5MB`). "
@@ -350,8 +350,7 @@ def convert_checkpoint_from_megatron_to_transformers(args: argparse.Namespace) -
     """
     Convert NVIDIA Megatron-LM checkpoint to HuggingFace Transformers checkpoint. This handles Megatron checkpoints
     with different tensor parallelism and pipeline parallelism sizes. It saves the converted checkpoint into shards
-    using HuggingFace Transformers checkpoint sharding functionality. This greatly extends the functionality of
-    `convert_megatron_gpt2_checkpoint.py`
+    using HuggingFace Transformers checkpoint sharding functionality.
 
     Args:
         args (argparse.Namespace): the arguments to the script
@@ -366,7 +365,7 @@ def convert_checkpoint_from_megatron_to_transformers(args: argparse.Namespace) -
             break
     print(f"Loading Megatron-LM checkpoint arguments from: {rank0_checkpoint_path}")  # type: ignore
     state_dict = torch.load(rank0_checkpoint_path, map_location="cpu")  # type: ignore
-    megatron_args = state_dict.get("args", None)
+    megatron_args: argparse.Namespace | None = state_dict.get("args", None)
     if megatron_args is None:
         raise ValueError(
             "Megatron-LM checkpoint does not contain arguments. This utility only supports Megatron-LM checkpoints"
@@ -401,6 +400,7 @@ def convert_checkpoint_from_megatron_to_transformers(args: argparse.Namespace) -
         eos_token_id=2,
         pretraining_tp=megatron_args.tensor_model_parallel_size,
         tie_word_embeddings=False,
+        rope_theta=10000,  # TODO: 確認
     )
 
     output_state_dict = {}
@@ -408,6 +408,8 @@ def convert_checkpoint_from_megatron_to_transformers(args: argparse.Namespace) -
     tp_size: int = megatron_args.tensor_model_parallel_size
     pp_size: int = megatron_args.pipeline_model_parallel_size
     dtype = torch.bfloat16
+    hidden_per_head: int = megatron_args.hidden_size // megatron_args.num_attention_heads
+    inv_freq = 1.0 / (config.rope_theta ** (torch.arange(0, hidden_per_head, 2).float() / hidden_per_head))
     # The regex to extract layer names.
     layer_re = re.compile(r"layers\.(\d+)\.([a-z0-9_.]+)\.([a-z]+)")
 
@@ -442,8 +444,6 @@ def convert_checkpoint_from_megatron_to_transformers(args: argparse.Namespace) -
     # The number of heads.
     heads: int = config.num_attention_heads
     n_heads_kv = getattr(args, "num_attention_heads_kv", heads)
-    # The hidden_size per head.
-    hidden_size_per_head: int = config.hidden_size // config.num_attention_heads
     num_layers: int = config.num_hidden_layers // pp_size
 
     for pp_rank in range(pp_size):
@@ -504,6 +504,8 @@ def convert_checkpoint_from_megatron_to_transformers(args: argparse.Namespace) -
                 # ln_name: input_layernorm
                 # weight_or_bias: weight
                 output_state_dict[layer_name + "." + ln_name + "." + weight_or_bias] = params
+                # rotary positional embeddings
+                output_state_dict[f"{layer_name}.self_attn.rotary_emb.inv_freq"] = inv_freq.to(dtype)
 
             # Transpose the QKV matrix.
             elif (op_name == "self_attention.query_key_value") and weight_or_bias == "weight":
@@ -558,11 +560,21 @@ def convert_checkpoint_from_megatron_to_transformers(args: argparse.Namespace) -
                 tp_state_dicts[0],
                 path="model.language_model.output_layer.weight"
             )
-            print(f"DEBUG: final norm weight: {final_norm_weight}")
-            print(f"DEBUG: lm head weight: {output_layer_weight}")
+            print(f"DEBUG: before version shape: {output_layer_weight.shape}")  # type: ignore
+            lm_head_weights: torch.Tensor = torch.cat(
+                [
+                    get_element_from_dict_by_path(
+                        tp_state_dicts[tp_rank], "model.language_model.output_layer.weight"  # type: ignore
+                    )
+                    for tp_rank in range(tp_size)
+                ],
+                dim=0,
+            )
+            print(f"DEBUG: final norm weight: {final_norm_weight}, shape: {final_norm_weight.shape}")
+            print(f"DEBUG: lm head weight: {lm_head_weights}, shape: {lm_head_weights.shape}")
 
             output_state_dict["model.norm.weight"] = final_norm_weight.to(dtype)  # type: ignore
-            output_state_dict["lm_head.weight"] = output_layer_weight.to(dtype)  # type: ignore
+            output_state_dict["lm_head.weight"] = lm_head_weights.to(dtype)  # type: ignore
 
     if config.num_hidden_layers != (layer_idx + 1):  # type: ignore
         raise ValueError(f"Expected {config.num_hidden_layers} layers but found {layer_idx + 1}")  # type: ignore
@@ -598,6 +610,12 @@ def convert_checkpoint_from_megatron_to_transformers(args: argparse.Namespace) -
     # Store the state_dict to file.
     max_shard_size = int(args.max_shard_size) if args.max_shard_size.isdigit() else args.max_shard_size
     shards, index = shard_checkpoint(output_state_dict, max_shard_size=max_shard_size)
+
+    # params count
+    param_count: int = 0
+    for k, v in output_state_dict.items():
+        param_count += v.numel()
+    print(f"total param count: {param_count}, total size: {param_count * 2}")
 
     # Save the model
     for shard_file, shard in shards.items():
