@@ -16,10 +16,10 @@ module load hpcx/2.12
 cd /bb/llm/gaf51275/llama/Megatron-LM
 source .env/bin/activate
 
-# convert to hf format
-python scripts/abci/megatron_to_hf/convert_megatron_to_hf.py \
+python scripts/abci/megatron_to_hf/llama_checkpoint_conversion.py \
   --convert_checkpoint_from_megatron_to_transformers \
-  --megatron-path /bb/llm/gaf51275/llama/Megatron-LM \
-  --load_path /bb/llm/gaf51275/llama/checkpoints/llama-2-7b-chat-megatron/tp2-pp2-lr-low/iter_0000600 \
+  --load_path /bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-7b-chat/tp1-pp1 \
   --save_path /bb/llm/gaf51275/llama/huggingface-checkpoint/Llama-2-7b-chat-megatron \
-  --tokenizer_name meta-llama/Llama-2-7b-chat-hf
+  --target_params_dtype "fp16" \
+  --print-checkpoint-structure \
+  --megatron-path /bb/llm/gaf51275/llama/Megatron-LM

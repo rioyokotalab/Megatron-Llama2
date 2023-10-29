@@ -314,7 +314,7 @@ def convert_wqkv(
     """
     n_hidden = qkv_w.size(1)
     hidden_dim = n_hidden // n_heads
-    qkv_w = permute_qkv(qkv_w, n_hidden, n_heads, n_heads_kv, revert=True)
+    # qkv_w = permute_qkv(qkv_w, n_hidden, n_heads, n_heads_kv, revert=True)
 
     n_qs_per_kv: int = n_heads // n_heads_kv
     n_groups: int = qkv_w.size(0) // hidden_dim // (n_qs_per_kv + 2)
