@@ -437,6 +437,7 @@ def convert_checkpoint_from_megatron_to_transformers(args: argparse.Namespace) -
 
     tp_size: int = megatron_args.tensor_model_parallel_size
     pp_size: int = megatron_args.pipeline_model_parallel_size
+    assert tp_size == 1 and pp_size == 1
 
     # The regex to extract layer names.
     layer_re = re.compile(r"layers\.(\d+)\.([a-z0-9_.]+)\.([a-z]+)")
