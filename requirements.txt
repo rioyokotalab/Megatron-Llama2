@@ -28,3 +28,4 @@ wheel
 
 # checkpoint convert
 transformers
+accelerate
