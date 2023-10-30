@@ -25,3 +25,6 @@ nltk
 ninja
 packaging
 wheel
+
+# checkpoint convert
+transformers
