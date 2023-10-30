@@ -297,14 +297,18 @@ def permute_qkv(
 
 
 def convert_wqkv(
-    qkv_w: torch.Tensor, layer_idx: int = 0, n_heads: int = 32, n_heads_kv: int = 8, tp_size: int = 1,
+    qkv_w: torch.Tensor,  # 7B: [4096x3, 4096]  # type: ignore
+    layer_idx: int = 0,
+    n_heads: int = 32,
+    n_heads_kv: int = 8,
+    tp_size: int = 1,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     """
     llama-2
-    qkv_w: [4096x3, 4096]
+    qkv_w: 7B: [4096x3, 4096]
 
     Args:
-        qkv_w (torch.Tensor): [Q K V]^T
+        qkv_w (torch.Tensor):
         layer_idx (int, optional):
         n_heads (int, optional):
         n_heads_kv (int, optional):
@@ -318,7 +322,7 @@ def convert_wqkv(
 
     n_qs_per_kv: int = n_heads // n_heads_kv
     n_groups: int = qkv_w.size(0) // hidden_dim // (n_qs_per_kv + 2)
-    qkv_w = list(torch.split(qkv_w, hidden_dim, dim=0))
+    qkv_w: list[torch.Tensor] = list(torch.split(qkv_w, hidden_dim, dim=0))
 
     wq, wk, wv = [], [], []
     for group in range(n_groups):
@@ -419,9 +423,11 @@ def convert_checkpoint_from_megatron_to_transformers(args: argparse.Namespace) -
         pretraining_tp=1,
         hidden_act='silu',
         hidden_size=megatron_args.hidden_size,
+        num_key_value_heads=megatron_args.num_query_groups if megatron_args.group_query_attention else megatron_args.num_attention_heads,
         intermediate_size=megatron_args.ffn_hidden_size,
         initializer_range=0.02,
         max_sequence_length=megatron_args.seq_length,
+        max_position_embeddings=megatron_args.seq_length,
         model_type='llama',
         num_attention_heads=megatron_args.num_attention_heads,
         num_hidden_layers=megatron_args.num_layers,
