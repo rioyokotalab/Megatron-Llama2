@@ -31,14 +31,15 @@ original_model = LlamaForCausalLM.from_pretrained(
     args.base_hf_model_path,
     device_map="cpu"
 )
+
 converted_model = LlamaForCausalLM.from_pretrained(
     args.converted_hf_model_path,
     device_map="cpu"
 )
 
 # state_dictを取得
-original_state_dict = original_model.state_dict()
-converted_state_dict = converted_model.state_dict()
+original_state_dict = original_model.state_dict()  # type: ignore
+converted_state_dict = converted_model.state_dict()  # type: ignore
 
 # state_dictの差分を比較
 diffs = compare_state_dicts(
