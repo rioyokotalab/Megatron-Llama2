@@ -1,9 +1,16 @@
 #!/bin/bash
-#YBATCH -r epyc-7502_8
-#SBATCH --job-name=megatron-hf-convert
-#SBATCH --time=6:00:00
+#YBATCH -r dgx-a100_8
+#SBATCH --job-name=convert
+#SBATCH --time=12:00:00
 #SBATCH --output outputs/checkpoint-convert/%j.out
 #SBATCH --error errors/checkpoint-convertk/%j.err
+. /etc/profile.d/modules.sh
+module load cuda/11.8
+module load cudnn/cuda-11.x/8.9.0
+module load nccl/cuda-11.7/2.14.3
+module load openmpi/4.0.5
+
+set -e
 
 # python virtualenv
 cd /home/kazuki/llama/Megatron-LM
