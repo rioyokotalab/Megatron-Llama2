@@ -16,7 +16,7 @@ MERGED_DIR=/mnt/nfs/Users/kazuki/dataset/merged/okazaki_lab_cc_600
 OUTPUT_DIR=/mnt/nfs/Users/kazuki/dataset/binarized/okazaki_lab_cc_600
 MODEL_PATH=/mnt/nfs/Users/kazuki/tokenizer/jalm_llama_clueweb_nfkc_16k_aligned_8/merged_tokenizer_sp/jalm_llama.model
 
-# merge en arxiv
+# merge en refined web
 MERGED_FILE_PATH="$MERGED_DIR/refined_web.jsonl"
 
 if [ -f "$MERGED_FILE_PATH" ]; then
