@@ -46,7 +46,7 @@ done <"$SGE_JOB_HOSTLIST" >"$HOSTFILE_NAME"
 
 # model config
 # llama-2-70b: https://huggingface.co/meta-llama/Llama-2-70b-hf/blob/main/config.json
-HIDDEN_SIZE=9192
+HIDDEN_SIZE=8192
 FFN_HIDDEN_SIZE=28672 # intermediate size (HuggingFace)
 NUM_LAYERS=80
 NUM_HEADS=64
@@ -60,7 +60,7 @@ DATA_PARALLEL_SIZE=$((${NUM_GPUS} / (${TENSOR_PARALLEL_SIZE} * ${PIPELINE_PARALL
 
 # training config
 MICRO_BATCH_SIZE=1
-GLOBAL_BATCH_SIZE=1024
+GLOBAL_BATCH_SIZE=1025
 TRAIN_STEPS=25000 # e.g. llama: 1T tokens / 4M tokens_per_batch = 250000 steps
 # 今回は約100B Tokensなので 1/10
 
@@ -82,25 +82,12 @@ DATASET_DIR=/bb/llm/gaf51275/llama/datasets/taishi-datasets/binarized
 
 DATA_PATH=""
 
-# ja mc4
-DATA_PATH="${DATA_PATH} 45914576536 ${DATASET_DIR}/mc4_text_document"
-# ja aozora
-DATA_PATH="${DATA_PATH} 160213881 ${DATASET_DIR}/ja_aozora_text_document"
-# ja cc100
-DATA_PATH="${DATA_PATH} 6308767651 ${DATASET_DIR}/ja_cc100_text_document"
-# ja wiki
-DATA_PATH="${DATA_PATH} 2923100972 ${DATASET_DIR}/ja_wiki_text_document"
-# ja oscar
-DATA_PATH="${DATA_PATH} 6093447282 ${DATASET_DIR}/ja_oscar_text_document"
-
-# en arxiv
-DATA_PATH="${DATA_PATH} 14378861379 ${DATASET_DIR}/en_arxiv_text_document"
 # en bookcorpus
 DATA_PATH="${DATA_PATH} 22303889850 ${DATASET_DIR}/en_books_text_document"
 
 
 # job name
-JOB_NAME="llama-2-7b-chat-${NODE_TYPE}-${NUM_NODES}node-${NUM_GPUS}gpu-${SEQ_LENGTH}s-DP=${DATA_PARALLEL_SIZE}-TP=${TENSOR_PARALLEL_SIZE}-PP=${PIPELINE_PARALLEL_SIZE}-BS=${GLOBAL_BATCH_SIZE}-LR=${LR}-MINLR=${MIN_LR}-WARMUP=${LR_WARMUP_STEPS}-WD=${WEIGHT_DECAY}-GC=${GRAD_CLIP}"
+JOB_NAME="llama-2-70b-base-${NODE_TYPE}-${NUM_NODES}node-${NUM_GPUS}gpu-${SEQ_LENGTH}s-DP=${DATA_PARALLEL_SIZE}-TP=${TENSOR_PARALLEL_SIZE}-PP=${PIPELINE_PARALLEL_SIZE}-BS=${GLOBAL_BATCH_SIZE}-LR=${LR}-MINLR=${MIN_LR}-WARMUP=${LR_WARMUP_STEPS}-WD=${WEIGHT_DECAY}-GC=${GRAD_CLIP}"
 
 # --norm-epsilon 1e-5 : conifg.json (RMS norm)
 
@@ -126,7 +113,6 @@ mpirun -np $NUM_GPUS \
   --tensor-model-parallel-size ${TENSOR_PARALLEL_SIZE} \
   --pipeline-model-parallel-size ${PIPELINE_PARALLEL_SIZE} \
   --sequence-parallel \
-  --use-distributed-optimizer \
   --num-layers ${NUM_LAYERS} \
   --hidden-size ${HIDDEN_SIZE} \
   --ffn-hidden-size ${FFN_HIDDEN_SIZE} \
@@ -174,5 +160,5 @@ mpirun -np $NUM_GPUS \
   --recompute-granularity "selective" \
   --use-mpi \
   --wandb-name ${JOB_NAME} \
-  --wandb-project "megatron-lm-llama" \
+  --wandb-project "flops-megatron-lm-llama" \
   --wandb-entity "prj-jalm"
