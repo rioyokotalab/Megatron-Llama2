@@ -1,7 +1,7 @@
 #!/bin/bash
 #YBATCH -r epyc-7502_1
 #SBATCH --job-name=tokenize
-#SBATCH --time=6:00:00
+#SBATCH --time=12:00:00
 #SBATCH --output outputs/tokenize/%j.out
 #SBATCH --error errors/tokenize/%j.err
 
