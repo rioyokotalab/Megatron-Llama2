@@ -81,6 +81,12 @@ DATASET_DIR=/bb/llm/gaf51275/llama/datasets/okazaki_lab_cc_600_extended
 
 DATA_PATH=""
 
+# ja wiki
+DATA_PATH="${DATA_PATH} 1703001349 ${DATASET_DIR}/ja_wiki_text_document"
+
+# en refined web
+DATA_PATH="${DATA_PATH} 7104827439 ${DATASET_DIR}/refined_web_text_document"
+
 # ja cc
 DATA_PATH="${DATA_PATH} 6716437158 ${DATASET_DIR}/split_0_text_document"
 DATA_PATH="${DATA_PATH} 6509734770 ${DATASET_DIR}/split_1_text_document"
@@ -88,11 +94,6 @@ DATA_PATH="${DATA_PATH} 7380245833 ${DATASET_DIR}/split_2_text_document"
 DATA_PATH="${DATA_PATH} 8704464243 ${DATASET_DIR}/split_3_text_document"
 DATA_PATH="${DATA_PATH} 11609156828 ${DATASET_DIR}/split_4_text_document"
 DATA_PATH="${DATA_PATH} 21320406772 ${DATASET_DIR}/split_5_text_document"
-
-# ja wiki
-DATA_PATH="${DATA_PATH} 1703001349 ${DATASET_DIR}/ja_wiki_text_document"
-# en refined-web
-DATA_PATH="${DATA_PATH} 11678299390 ${DATASET_DIR}/refined_web_text_document"
 
 # job name
 JOB_NAME="llama-2-7b-chat-${NODE_TYPE}-${NUM_NODES}node-${NUM_GPUS}gpu-${SEQ_LENGTH}s-DP=${DATA_PARALLEL_SIZE}-TP=${TENSOR_PARALLEL_SIZE}-PP=${PIPELINE_PARALLEL_SIZE}-BS=${GLOBAL_BATCH_SIZE}-LR=${LR}-MINLR=${MIN_LR}-WARMUP=${LR_WARMUP_STEPS}-WD=${WEIGHT_DECAY}-GC=${GRAD_CLIP}"
