@@ -26,8 +26,8 @@ BASE_TENSOR_PARALLEL_SIZE=2
 BASE_PIPELINE_PARALLEL_SIZE=2
 
 # model config
-BASE_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/checkpoints/llama-2-7b-chat-megatron/tp${BASE_TENSOR_PARALLEL_SIZE}-pp${BASE_PIPELINE_PARALLEL_SIZE}-exp
-TARGET_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/checkpoints/llama-2-7b-chat-megatron/tp${TARGET_TENSOR_PARALLEL_SIZE}-pp${TARGET_PIPELINE_PARALLEL_SIZE}
+BASE_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/checkpoints/llama-2-7b-chat-megatron/tp${BASE_TENSOR_PARALLEL_SIZE}-pp${BASE_PIPELINE_PARALLEL_SIZE}-lr-low
+TARGET_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/checkpoints/llama-2-7b-chat-megatron/tp${TARGET_TENSOR_PARALLEL_SIZE}-pp${TARGET_PIPELINE_PARALLEL_SIZE}/chat-tp2-pp2-lr-low
 
 mkdir -p ${TARGET_CHECKPOINT_DIR}
 

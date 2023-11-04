@@ -22,12 +22,12 @@ source .env/bin/activate
 BASE_TENSOR_PARALLEL_SIZE=1  # fixed
 BASE_PIPELINE_PARALLEL_SIZE=1 # fixed
 
-SAVE_DIR=/bb/llm/gaf51275/llama/from_megatron_hf_checkpoints/Llama-2-7b-chat/tp2-pp2-exp
+SAVE_DIR=/bb/llm/gaf51275/llama/from_megatron_hf_checkpoints/Llama-2-7b-chat/tp2-pp2-lr-low
 mkdir -p ${SAVE_DIR}
 
 python scripts/abci/megatron_to_hf/llama_checkpoint_conversion.py \
   --convert_checkpoint_from_megatron_to_transformers \
-  --load_path /bb/llm/gaf51275/llama/checkpoints/llama-2-7b-chat-megatron/tp1-pp1/chat-tp2-pp2-exp-iter5600 \
+  --load_path /bb/llm/gaf51275/llama/checkpoints/llama-2-7b-chat-megatron/tp1-pp1/chat-tp2-pp2-lr-low \
   --save_path $SAVE_DIR \
   --target_params_dtype "fp16" \
   --print-checkpoint-structure \
