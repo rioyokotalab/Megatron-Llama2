@@ -1,5 +1,5 @@
 #!/bin/bash
-#$ -l rt_AF=50
+#$ -l rt_AF=32
 #$ -l h_rt=20:00:00:00
 #$ -j y
 #$ -o outputs/llama-2-70b-base/
@@ -55,12 +55,12 @@ SEQ_LENGTH=4096
 
 # distributed settings
 TENSOR_PARALLEL_SIZE=8   # fixed
-PIPELINE_PARALLEL_SIZE=10 # num layers 80: Llama-2 70B
+PIPELINE_PARALLEL_SIZE=8 # num layers 80: Llama-2 70B
 DATA_PARALLEL_SIZE=$((${NUM_GPUS} / (${TENSOR_PARALLEL_SIZE} * ${PIPELINE_PARALLEL_SIZE})))
 
 # training config
 MICRO_BATCH_SIZE=1
-GLOBAL_BATCH_SIZE=1025
+GLOBAL_BATCH_SIZE=1024
 TRAIN_STEPS=25000 # e.g. llama: 1T tokens / 4M tokens_per_batch = 250000 steps
 # 今回は約100B Tokensなので 1/10
 
@@ -113,6 +113,7 @@ mpirun -np $NUM_GPUS \
   --tensor-model-parallel-size ${TENSOR_PARALLEL_SIZE} \
   --pipeline-model-parallel-size ${PIPELINE_PARALLEL_SIZE} \
   --sequence-parallel \
+  --use-distributed-optimizer \
   --num-layers ${NUM_LAYERS} \
   --hidden-size ${HIDDEN_SIZE} \
   --ffn-hidden-size ${FFN_HIDDEN_SIZE} \
@@ -141,7 +142,7 @@ mpirun -np $NUM_GPUS \
   --adam-beta1 0.9 \
   --adam-beta2 0.95 \
   --log-interval 1 \
-  --save-interval 200 \
+  --save-interval 500 \
   --eval-interval 100 \
   --eval-iters 10 \
   --bf16 \
