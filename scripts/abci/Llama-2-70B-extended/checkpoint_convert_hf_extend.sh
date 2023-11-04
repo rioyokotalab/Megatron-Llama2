@@ -17,11 +17,11 @@ cd /bb/llm/gaf51275/llama/Megatron-LM
 source .env/bin/activate
 
 # distributed settings
-TENSOR_PARALLEL_SIZE=8   # fixed
+TENSOR_PARALLEL_SIZE=4   # fixed
 PIPELINE_PARALLEL_SIZE=8 # num layers 80: Llama-2 7B
 
 # model config
-HF_CHECKPOINT_DIR=/bb/llm/gaf51275/jalm/modified-llama2-chat-tokenizer-nfkc-aligned-8/llama2-70b-chat-merged-tokenizer-nfkc-16k-hf
+HF_CHECKPOINT_DIR=/bb/llm/gaf51275/jalm/modified-llama2-base-tokenizer-nfkc-aligned-8/llama2-70b-base-merged-tokenizer-nfkc-16k-hf
 MEGATRON_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-70b-extended/tp${TENSOR_PARALLEL_SIZE}-pp${PIPELINE_PARALLEL_SIZE}
 
 mkdir -p ${MEGATRON_CHECKPOINT_DIR}
