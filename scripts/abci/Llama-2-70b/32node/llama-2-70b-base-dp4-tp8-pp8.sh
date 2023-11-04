@@ -65,7 +65,7 @@ TRAIN_STEPS=25000 # e.g. llama: 1T tokens / 4M tokens_per_batch = 250000 steps
 # 今回は約100B Tokensなので 1/10
 
 LR=5e-5
-MIN_LR=1.6e-7
+MIN_LR=1.6e-6
 LR_WARMUP_STEPS=1000
 WEIGHT_DECAY=0.1
 GRAD_CLIP=1
