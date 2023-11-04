@@ -161,5 +161,5 @@ mpirun -np $NUM_GPUS \
   --recompute-granularity "selective" \
   --use-mpi \
   --wandb-name ${JOB_NAME} \
-  --wandb-project "flops-megatron-lm-llama" \
+  --wandb-project "Llama-2-70B" \
   --wandb-entity "prj-jalm"
