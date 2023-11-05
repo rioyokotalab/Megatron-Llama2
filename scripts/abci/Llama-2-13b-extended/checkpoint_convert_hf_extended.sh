@@ -21,13 +21,13 @@ TENSOR_PARALLEL_SIZE=2   # fixed
 PIPELINE_PARALLEL_SIZE=4 # num layers 40: Llama-2 13B
 
 # model config
-HF_CHECKPOINT_DIR=/bb/llm/gaf51275/jalm/modified-llama2-base-tokenizer-nfkc-aligned-8/llama2-13b-base-merged-tokenizer-nfkc-16k-hf
-MEGATRON_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-13b-extended/tp${TENSOR_PARALLEL_SIZE}-pp${PIPELINE_PARALLEL_SIZE}
+HF_CHECKPOINT_DIR=/bb/llm/gaf51275/jalm/modified-llama2-tokenizer-okazaki-lab-cc-nfkc-aligned-8/llama2-13b-merged-tokenizer-okazaki-lab-cc-nfkc-16k-hf
+MEGATRON_CHECKPOINT_DIR=/bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-13b-extended/okazaki_lab_cc/tp${TENSOR_PARALLEL_SIZE}-pp${PIPELINE_PARALLEL_SIZE}
 
 mkdir -p ${MEGATRON_CHECKPOINT_DIR}
 
 # tokenizer config
-TOKENIZER_MODEL=/bb/llm/gaf51275/jalm/jalm-tokenizer-private/tokenizer/jalm_llama_clueweb_nfkc_16k_aligned_8/merged_tokenizer_sp/jalm_llama.model
+TOKENIZER_MODEL=/bb/llm/gaf51275/jalm/jalm-tokenizer-private/tokenizer/jalm_llama_okazaki_lab_cc_nfkc_16k_aligned_8/merged_tokenizer_sp/jalm_llama.model
 
 # convert
 python tools/checkpoint/util.py \
