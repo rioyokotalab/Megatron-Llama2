@@ -2,7 +2,7 @@
 #$ -l rt_AF=32
 #$ -l h_rt=20:00:00:00
 #$ -j y
-#$ -o outputs/llama-2-70b-base/
+#$ -o outputs/llama-2-70b-base/32node/
 #$ -cwd
 
 # module load
@@ -78,12 +78,12 @@ CHECKPOINT_SAVE_DIR=/bb/llm/gaf51275/llama/checkpoints/llama-2-70b-base-extended
 mkdir -p ${CHECKPOINT_SAVE_DIR}
 
 # data config
-DATASET_DIR=/bb/llm/gaf51275/llama/datasets/taishi-datasets/binarized
+DATASET_DIR=/bb/llm/gaf51275/llama/datasets/okazaki_lab_cc_600_extended
 
 DATA_PATH=""
 
-# en bookcorpus
-DATA_PATH="${DATA_PATH} 22303889850 ${DATASET_DIR}/en_books_text_document"
+# ja wiki
+DATA_PATH="${DATA_PATH} 1703001349 ${DATASET_DIR}/ja_wiki_text_document"
 
 
 # job name
