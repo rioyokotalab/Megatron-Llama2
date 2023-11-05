@@ -1,8 +1,8 @@
 #!/bin/bash
-#$ -l rt_AF=8
+#$ -l rt_AF=32
 #$ -l h_rt=20:00:00:00
 #$ -j y
-#$ -o outputs/llama-2-13b-base/clueweb/
+#$ -o outputs/llama-2-70b-base/32node/okazaki-lab-cc/
 #$ -cwd
 
 # module load
@@ -45,16 +45,17 @@ while read -r line; do
 done <"$SGE_JOB_HOSTLIST" >"$HOSTFILE_NAME"
 
 # model config
-# llama-2-13b: https://huggingface.co/meta-llama/Llama-2-13b-hf/blob/main/config.json
-HIDDEN_SIZE=5120
-FFN_HIDDEN_SIZE=13824 # intermediate size (HuggingFace)
-NUM_LAYERS=40
-NUM_HEADS=40
+# llama-2-70b: https://huggingface.co/meta-llama/Llama-2-70b-hf/blob/main/config.json
+HIDDEN_SIZE=8192
+FFN_HIDDEN_SIZE=28672 # intermediate size (HuggingFace)
+NUM_LAYERS=80
+NUM_HEADS=64
+NUM_KEY_VALUE_HEADS=8
 SEQ_LENGTH=4096
 
 # distributed settings
-TENSOR_PARALLEL_SIZE=2   # fixed
-PIPELINE_PARALLEL_SIZE=4 # num layers 40: Llama-2 13B
+TENSOR_PARALLEL_SIZE=8   # fixed
+PIPELINE_PARALLEL_SIZE=8 # num layers 80: Llama-2 70B
 DATA_PARALLEL_SIZE=$((${NUM_GPUS} / (${TENSOR_PARALLEL_SIZE} * ${PIPELINE_PARALLEL_SIZE})))
 
 # training config
@@ -63,43 +64,30 @@ GLOBAL_BATCH_SIZE=1024
 TRAIN_STEPS=25000 # e.g. llama: 1T tokens / 4M tokens_per_batch = 250000 steps
 # 今回は約100B Tokensなので 1/10
 
-LR=1e-4
-MIN_LR=3.3e-6
+LR=5e-5
+MIN_LR=1.6e-6
 LR_WARMUP_STEPS=1000
 WEIGHT_DECAY=0.1
 GRAD_CLIP=1
 
 # model config
-TOKENIZER_MODEL=/bb/llm/gaf51275/jalm/jalm-tokenizer-private/tokenizer/jalm_llama_clueweb_nfkc_16k_aligned_8/merged_tokenizer_sp/jalm_llama.model
-CHECKPOINT_DIR=/bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-13b-extended/clueweb/tp${TENSOR_PARALLEL_SIZE}-pp${PIPELINE_PARALLEL_SIZE}
-CHECKPOINT_SAVE_DIR=/bb/llm/gaf51275/llama/checkpoints/llama-2-13b-base-extended-megatron/clueweb/tp${TENSOR_PARALLEL_SIZE}-pp${PIPELINE_PARALLEL_SIZE}
+TOKENIZER_MODEL=/bb/llm/gaf51275/jalm/jalm-tokenizer-private/tokenizer/jalm_llama_okazaki_lab_cc_nfkc_16k_aligned_8/merged_tokenizer_sp/jalm_llama.model
+CHECKPOINT_DIR=/bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-70b-extended/okazaki_lab_cc/tp${TENSOR_PARALLEL_SIZE}-pp${PIPELINE_PARALLEL_SIZE}
+CHECKPOINT_SAVE_DIR=/bb/llm/gaf51275/llama/checkpoints/llama-2-70b-base-extended-megatron/okazaki_lab_cc/tp${TENSOR_PARALLEL_SIZE}-pp${PIPELINE_PARALLEL_SIZE}
 
 mkdir -p ${CHECKPOINT_SAVE_DIR}
 
 # data config
-DATASET_DIR=/bb/llm/gaf51275/llama/datasets/taishi-datasets/binarized
+DATASET_DIR=/bb/llm/gaf51275/llama/datasets/okazaki_lab_cc_600_extended
 
 DATA_PATH=""
 
-# ja mc4
-DATA_PATH="${DATA_PATH} 45914576536 ${DATASET_DIR}/mc4_text_document"
-# ja aozora
-DATA_PATH="${DATA_PATH} 160213881 ${DATASET_DIR}/ja_aozora_text_document"
-# ja cc100
-DATA_PATH="${DATA_PATH} 6308767651 ${DATASET_DIR}/ja_cc100_text_document"
 # ja wiki
-DATA_PATH="${DATA_PATH} 2923100972 ${DATASET_DIR}/ja_wiki_text_document"
-# ja oscar
-DATA_PATH="${DATA_PATH} 6093447282 ${DATASET_DIR}/ja_oscar_text_document"
-
-# en arxiv
-DATA_PATH="${DATA_PATH} 14378861379 ${DATASET_DIR}/en_arxiv_text_document"
-# en bookcorpus
-DATA_PATH="${DATA_PATH} 22303889850 ${DATASET_DIR}/en_books_text_document"
+DATA_PATH="${DATA_PATH} 1703001349 ${DATASET_DIR}/ja_wiki_text_document"
 
 
 # job name
-JOB_NAME="llama-2-13b-base-extended-clueweb-${NODE_TYPE}-${NUM_NODES}node-${NUM_GPUS}gpu-${SEQ_LENGTH}s-DP=${DATA_PARALLEL_SIZE}-TP=${TENSOR_PARALLEL_SIZE}-PP=${PIPELINE_PARALLEL_SIZE}-BS=${GLOBAL_BATCH_SIZE}-LR=${LR}-MINLR=${MIN_LR}-WARMUP=${LR_WARMUP_STEPS}-WD=${WEIGHT_DECAY}-GC=${GRAD_CLIP}"
+JOB_NAME="llama-2-70b-base-extended-okazaki-lab-cc-${NODE_TYPE}-${NUM_NODES}node-${NUM_GPUS}gpu-${SEQ_LENGTH}s-DP=${DATA_PARALLEL_SIZE}-TP=${TENSOR_PARALLEL_SIZE}-PP=${PIPELINE_PARALLEL_SIZE}-BS=${GLOBAL_BATCH_SIZE}-LR=${LR}-MINLR=${MIN_LR}-WARMUP=${LR_WARMUP_STEPS}-WD=${WEIGHT_DECAY}-GC=${GRAD_CLIP}"
 
 # --norm-epsilon 1e-5 : conifg.json (RMS norm)
 
@@ -173,5 +161,5 @@ mpirun -np $NUM_GPUS \
   --recompute-granularity "selective" \
   --use-mpi \
   --wandb-name ${JOB_NAME} \
-  --wandb-project "Llama-2-13B" \
+  --wandb-project "Llama-2-70B" \
   --wandb-entity "prj-jalm"
