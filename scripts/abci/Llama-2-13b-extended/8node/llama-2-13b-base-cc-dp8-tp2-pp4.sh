@@ -82,7 +82,20 @@ DATASET_DIR=/bb/llm/gaf51275/llama/datasets/okazaki_lab_cc_1500_okazaki_lab_cc_n
 DATA_PATH=""
 
 # ja okazaki lab common crawl
-DATA_PATH="${DATA_PATH} 1 ${DATASET_DIR}/split_0_text_document"
+DATA_PATH="${DATA_PATH} 10107838110 ${DATASET_DIR}/split_0_text_document"
+DATA_PATH="${DATA_PATH} 9973864133 ${DATASET_DIR}/split_1_text_document"
+DATA_PATH="${DATA_PATH} 11880494993 ${DATASET_DIR}/split_2_text_document"
+DATA_PATH="${DATA_PATH} 15674848510 ${DATASET_DIR}/split_3_text_document"
+DATA_PATH="${DATA_PATH} 36545835916 ${DATASET_DIR}/split_4_text_document"
+
+# ja wikipedia
+DATA_PATH="${DATA_PATH} 1672543873 ${DATASET_DIR}/ja_wiki_merged_train_text_document"
+
+# en arxiv
+DATA_PATH="${DATA_PATH} 5000000000 ${DATASET_DIR}/lumi_en_arxiv_merged_text_document"
+
+# en falcon refined-web
+DATA_PATH="${DATA_PATH} 5000000000 ${DATASET_DIR}/lumi_en_falcon_merged_threadripper-3960x_8_text_document"
 
 # job name
 JOB_NAME="llama-2-13b-base-extended-okazaki-lab-cc-${NODE_TYPE}-${NUM_NODES}node-${NUM_GPUS}gpu-${SEQ_LENGTH}s-DP=${DATA_PARALLEL_SIZE}-TP=${TENSOR_PARALLEL_SIZE}-PP=${PIPELINE_PARALLEL_SIZE}-BS=${GLOBAL_BATCH_SIZE}-LR=${LR}-MINLR=${MIN_LR}-WARMUP=${LR_WARMUP_STEPS}-WD=${WEIGHT_DECAY}-GC=${GRAD_CLIP}"
