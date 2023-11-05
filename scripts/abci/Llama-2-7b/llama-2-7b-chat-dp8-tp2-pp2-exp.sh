@@ -161,7 +161,7 @@ mpirun -np $NUM_GPUS \
   --untie-embeddings-and-output-weights \
   --use-rotary-position-embeddings \
   --normalization RMSNorm \
-  --norm-epsilon 1e-6 \
+  --norm-epsilon 1e-5 \
   --no-position-embedding \
   --no-masked-softmax-fusion \
   --no-query-key-layer-scaling \
@@ -173,5 +173,5 @@ mpirun -np $NUM_GPUS \
   --recompute-granularity "selective" \
   --use-mpi \
   --wandb-name ${JOB_NAME} \
-  --wandb-project "megatron-lm-llama" \
+  --wandb-project "Llama-2-7B" \
   --wandb-entity "prj-jalm"
