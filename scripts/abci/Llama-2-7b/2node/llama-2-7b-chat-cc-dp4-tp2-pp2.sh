@@ -1,6 +1,6 @@
 #!/bin/bash
 #$ -l rt_AF=2
-#$ -l h_rt=20:00:00:00
+#$ -l h_rt=28:00:00:00
 #$ -j y
 #$ -o outputs/llama-2-7b-chat/2node/
 #$ -cwd
@@ -82,7 +82,20 @@ DATASET_DIR=/bb/llm/gaf51275/llama/datasets/okazaki_lab_cc_1500_okazaki_lab_cc_o
 DATA_PATH=""
 
 # ja okazaki lab common crawl
-DATA_PATH="${DATA_PATH} 1 ${DATASET_DIR}/split_0_text_document"
+DATA_PATH="${DATA_PATH} 10414138710 ${DATASET_DIR}/split_0_text_document"
+DATA_PATH="${DATA_PATH} 10310340698 ${DATASET_DIR}/split_1_text_document"
+DATA_PATH="${DATA_PATH} 12327844508 ${DATASET_DIR}/split_2_text_document"
+DATA_PATH="${DATA_PATH} 16269817007 ${DATASET_DIR}/split_3_text_document"
+DATA_PATH="${DATA_PATH} 38018807005 ${DATASET_DIR}/split_4_text_document"
+
+# ja wikipedia
+DATA_PATH="${DATA_PATH} 2659052072 ${DATASET_DIR}/ja_wiki_merged_train_text_document"
+
+# en arxiv
+DATA_PATH="${DATA_PATH} 5000000000 ${DATASET_DIR}/lumi_en_arxiv_merged_text_document"
+
+# en falcon refined-web
+DATA_PATH="${DATA_PATH} 5000000000 ${DATASET_DIR}/lumi_en_falcon_merged_threadripper-3960x_8_text_document"
 
 # job name
 JOB_NAME="llama-2-7b-chat-okazaki-lab-cc-${NODE_TYPE}-${NUM_NODES}node-${NUM_GPUS}gpu-${SEQ_LENGTH}s-DP=${DATA_PARALLEL_SIZE}-TP=${TENSOR_PARALLEL_SIZE}-PP=${PIPELINE_PARALLEL_SIZE}-BS=${GLOBAL_BATCH_SIZE}-LR=${LR}-MINLR=${MIN_LR}-WARMUP=${LR_WARMUP_STEPS}-WD=${WEIGHT_DECAY}-GC=${GRAD_CLIP}"
