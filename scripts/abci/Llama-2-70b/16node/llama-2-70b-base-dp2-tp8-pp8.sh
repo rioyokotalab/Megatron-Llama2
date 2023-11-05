@@ -82,8 +82,21 @@ DATASET_DIR=/bb/llm/gaf51275/llama/datasets/okazaki_lab_cc_1500_okazaki_lab_cc_o
 
 DATA_PATH=""
 
-# ja okazaki-lab common crawl
-DATA_PATH="${DATA_PATH} 1 ${DATASET_DIR}/split_0_text_document"
+# ja okazaki lab common crawl
+DATA_PATH="${DATA_PATH} 10414138710 ${DATASET_DIR}/split_0_text_document"
+DATA_PATH="${DATA_PATH} 10310340698 ${DATASET_DIR}/split_1_text_document"
+DATA_PATH="${DATA_PATH} 12327844508 ${DATASET_DIR}/split_2_text_document"
+DATA_PATH="${DATA_PATH} 16269817007 ${DATASET_DIR}/split_3_text_document"
+DATA_PATH="${DATA_PATH} 38018807005 ${DATASET_DIR}/split_4_text_document"
+
+# ja wikipedia
+DATA_PATH="${DATA_PATH} 2659052072 ${DATASET_DIR}/ja_wiki_merged_train_text_document"
+
+# en arxiv
+DATA_PATH="${DATA_PATH} 5000000000 ${DATASET_DIR}/lumi_en_arxiv_merged_text_document"
+
+# en falcon refined-web
+DATA_PATH="${DATA_PATH} 5000000000 ${DATASET_DIR}/lumi_en_falcon_merged_threadripper-3960x_8_text_document"
 
 
 # job name
