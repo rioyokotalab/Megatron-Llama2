@@ -83,11 +83,11 @@ DATASET_DIR=/bb/llm/gaf51275/llama/datasets/okazaki_lab_cc_1500_okazaki_lab_cc_n
 DATA_PATH=""
 
 # ja okazaki lab common crawl
-DATA_PATH="${DATA_PATH} 10107838110 ${DATASET_DIR}/split_0_text_document"
-DATA_PATH="${DATA_PATH} 9973864133 ${DATASET_DIR}/split_1_text_document"
-DATA_PATH="${DATA_PATH} 11880494993 ${DATASET_DIR}/split_2_text_document"
-DATA_PATH="${DATA_PATH} 15674848510 ${DATASET_DIR}/split_3_text_document"
-DATA_PATH="${DATA_PATH} 36545835916 ${DATASET_DIR}/split_4_text_document"
+DATA_PATH="${DATA_PATH} 10605477142 ${DATASET_DIR}/split_0_text_document"
+DATA_PATH="${DATA_PATH} 10464907226 ${DATASET_DIR}/split_1_text_document"
+DATA_PATH="${DATA_PATH} 12465407213 ${DATASET_DIR}/split_2_text_document"
+DATA_PATH="${DATA_PATH} 16446568076 ${DATASET_DIR}/split_3_text_document"
+DATA_PATH="${DATA_PATH} 38345096470 ${DATASET_DIR}/split_4_text_document"
 
 # ja wikipedia
 DATA_PATH="${DATA_PATH} 1672543873 ${DATASET_DIR}/ja_wiki_merged_train_text_document"
