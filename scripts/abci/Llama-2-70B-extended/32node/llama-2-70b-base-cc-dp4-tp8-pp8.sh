@@ -78,12 +78,12 @@ CHECKPOINT_SAVE_DIR=/bb/llm/gaf51275/llama/checkpoints/llama-2-70b-base-extended
 mkdir -p ${CHECKPOINT_SAVE_DIR}
 
 # data config
-DATASET_DIR=/bb/llm/gaf51275/llama/datasets/okazaki_lab_cc_600_extended
+DATASET_DIR=/bb/llm/gaf51275/llama/datasets/okazaki_lab_cc_1500_okazaki_lab_cc_nfkc_16k_aligned_8
 
 DATA_PATH=""
 
-# ja wiki
-DATA_PATH="${DATA_PATH} 1703001349 ${DATASET_DIR}/ja_wiki_text_document"
+# ja okazaki lab common crawl
+DATA_PATH="${DATA_PATH} 1 ${DATASET_DIR}/split_0_text_document"
 
 
 # job name
