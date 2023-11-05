@@ -78,12 +78,12 @@ CHECKPOINT_SAVE_DIR=/bb/llm/gaf51275/llama/checkpoints/llama-2-70b-base-megatron
 mkdir -p ${CHECKPOINT_SAVE_DIR}
 
 # data config
-DATASET_DIR=/bb/llm/gaf51275/llama/datasets/taishi-datasets/binarized
+DATASET_DIR=/bb/llm/gaf51275/llama/datasets/okazaki_lab_cc_1500_okazaki_lab_cc_original
 
 DATA_PATH=""
 
-# en bookcorpus
-DATA_PATH="${DATA_PATH} 22303889850 ${DATASET_DIR}/en_books_text_document"
+# ja okazaki-lab common crawl
+DATA_PATH="${DATA_PATH} 1 ${DATASET_DIR}/split_0_text_document"
 
 
 # job name
