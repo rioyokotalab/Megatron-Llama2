@@ -77,26 +77,12 @@ CHECKPOINT_SAVE_DIR=/bb/llm/gaf51275/llama/checkpoints/llama-2-13b-base-extended
 mkdir -p ${CHECKPOINT_SAVE_DIR}
 
 # data config
-DATASET_DIR=/bb/llm/gaf51275/llama/datasets/taishi-datasets/binarized
+DATASET_DIR=/bb/llm/gaf51275/llama/datasets/okazaki_lab_cc_1500_okazaki_lab_cc_nfkc_16k_aligned_8
 
 DATA_PATH=""
 
-# ja mc4
-DATA_PATH="${DATA_PATH} 45914576536 ${DATASET_DIR}/mc4_text_document"
-# ja aozora
-DATA_PATH="${DATA_PATH} 160213881 ${DATASET_DIR}/ja_aozora_text_document"
-# ja cc100
-DATA_PATH="${DATA_PATH} 6308767651 ${DATASET_DIR}/ja_cc100_text_document"
-# ja wiki
-DATA_PATH="${DATA_PATH} 2923100972 ${DATASET_DIR}/ja_wiki_text_document"
-# ja oscar
-DATA_PATH="${DATA_PATH} 6093447282 ${DATASET_DIR}/ja_oscar_text_document"
-
-# en arxiv
-DATA_PATH="${DATA_PATH} 14378861379 ${DATASET_DIR}/en_arxiv_text_document"
-# en bookcorpus
-DATA_PATH="${DATA_PATH} 22303889850 ${DATASET_DIR}/en_books_text_document"
-
+# ja okazaki lab common crawl
+DATA_PATH="${DATA_PATH} 1 ${DATASET_DIR}/split_0_text_document"
 
 # job name
 JOB_NAME="llama-2-13b-base-extended-okazaki-lab-cc-${NODE_TYPE}-${NUM_NODES}node-${NUM_GPUS}gpu-${SEQ_LENGTH}s-DP=${DATA_PARALLEL_SIZE}-TP=${TENSOR_PARALLEL_SIZE}-PP=${PIPELINE_PARALLEL_SIZE}-BS=${GLOBAL_BATCH_SIZE}-LR=${LR}-MINLR=${MIN_LR}-WARMUP=${LR_WARMUP_STEPS}-WD=${WEIGHT_DECAY}-GC=${GRAD_CLIP}"
