@@ -47,7 +47,7 @@ LR=1e-4
 MIN_LR=3.3e-6
 LR_WARMUP_STEPS=1000
 WEIGHT_DECAY=0.1
-GRAD_CLIP=18
+GRAD_CLIP=1
 # model config
 TOKENIZER_MODEL=/home/taishi/jalm-tokenizer-private/tokenizer/jalm_llama_clueweb_nfkc_16k_aligned_8/merged_tokenizer_sp/jalm_llama.model
 CHECKPOINT_DIR=/home/taishi/llama-megatron-convert-checkpoint-hf/Llama-2-13b-extended/clueweb/tp2-pp4/
