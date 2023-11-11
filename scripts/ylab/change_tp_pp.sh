@@ -32,6 +32,10 @@ mkdir -p ${TARGET_CHECKPOINT_DIR}
 # tokenizer config
 TOKENIZER_MODEL=/mnt/nfs/Users/kazuki/hf_checkpoints/Llama-2-70b-hf/tokenizer.model
 
+# change latest_checkpointed_iteration.txt
+ITERATION=2000
+echo $ITERATION >${BASE_CHECKPOINT_DIR}/latest_checkpointed_iteration.txt
+
 # convert
 python tools/checkpoint/util.py \
   --model-type GPT \
