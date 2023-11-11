@@ -35,7 +35,7 @@ mkdir -p ${TARGET_CHECKPOINT_DIR}
 TOKENIZER_MODEL=/bb/llm/gaf51275/jalm/jalm-tokenizer-private/tokenizer/jalm_llama_okazaki_lab_cc_nfkc_16k_aligned_8/merged_tokenizer_sp/jalm_llama.model
 
 # change latest_checkpointed_iteration.txt
-ITERATION=2000
+ITERATION=10000
 echo $ITERATION >${BASE_CHECKPOINT_DIR}/latest_checkpointed_iteration.txt
 
 # convert
