@@ -1,6 +1,6 @@
 #!/bin/bash
 #$ -l rt_AF=8
-#$ -l h_rt=20:00:00:00
+#$ -l h_rt=4:23:00:00
 #$ -j y
 #$ -o outputs/llama-2-13b-base/clueweb/
 #$ -cwd
@@ -72,30 +72,28 @@ GRAD_CLIP=1
 # model config
 TOKENIZER_MODEL=/bb/llm/gaf51275/jalm/jalm-tokenizer-private/tokenizer/jalm_llama_clueweb_nfkc_16k_aligned_8/merged_tokenizer_sp/jalm_llama.model
 CHECKPOINT_DIR=/bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-13b-extended/clueweb/tp${TENSOR_PARALLEL_SIZE}-pp${PIPELINE_PARALLEL_SIZE}
-CHECKPOINT_SAVE_DIR=/bb/llm/gaf51275/llama/checkpoints/llama-2-13b-base-extended-megatron/clueweb/tp${TENSOR_PARALLEL_SIZE}-pp${PIPELINE_PARALLEL_SIZE}
+CHECKPOINT_SAVE_DIR=/bb/llm/gaf51275/llama/checkpoints/mdx-llama-2-13b-extended-clueweb-16k-hf-megatron-tp2-pp4
 
 mkdir -p ${CHECKPOINT_SAVE_DIR}
 
 # data config
-DATASET_DIR=/bb/llm/gaf51275/llama/datasets/taishi-datasets/binarized
+DATASET_DIR=/bb/llm/gaf51275/llama/datasets/mdx/ClueWeb22Ja_sample1200_1107_clueweb_nfkc_16k_aligned_8
 
 DATA_PATH=""
 
-# ja mc4
-DATA_PATH="${DATA_PATH} 45914576536 ${DATASET_DIR}/mc4_text_document"
-# ja aozora
-DATA_PATH="${DATA_PATH} 160213881 ${DATASET_DIR}/ja_aozora_text_document"
-# ja cc100
-DATA_PATH="${DATA_PATH} 6308767651 ${DATASET_DIR}/ja_cc100_text_document"
+# ja clueweb
+DATA_PATH="${DATA_PATH} 9266136291 ${DATASET_DIR}/ClueWeb22Ja_sample1200_1107_split_0_text_document"
+DATA_PATH="${DATA_PATH} 12318833677 ${DATASET_DIR}/ClueWeb22Ja_sample1200_1107_split_1_text_document"
+DATA_PATH="${DATA_PATH} 33799731557 ${DATASET_DIR}/ClueWeb22Ja_sample1200_1107_split_2_text_document"
+DATA_PATH="${DATA_PATH} 32912297127 ${DATASET_DIR}/ClueWeb22Ja_sample1200_1107_split_3_text_document"
+
 # ja wiki
-DATA_PATH="${DATA_PATH} 2923100972 ${DATASET_DIR}/ja_wiki_text_document"
-# ja oscar
-DATA_PATH="${DATA_PATH} 6093447282 ${DATASET_DIR}/ja_oscar_text_document"
+DATA_PATH="${DATA_PATH} 1703001349 ${DATASET_DIR}/ja_wiki_merged_text_document"
 
 # en arxiv
-DATA_PATH="${DATA_PATH} 14378861379 ${DATASET_DIR}/en_arxiv_text_document"
-# en bookcorpus
-DATA_PATH="${DATA_PATH} 22303889850 ${DATASET_DIR}/en_books_text_document"
+DATA_PATH="${DATA_PATH} 5000000000 ${DATASET_DIR}/lumi_en_arxiv_merge_text_document"
+# en refinedweb
+DATA_PATH="${DATA_PATH} 5000000000 ${DATASET_DIR}/lumi_en_falcon_merge_text_document"
 
 
 # job name
