@@ -129,6 +129,7 @@ def find_checkpoint_rank_0(checkpoints_path, iteration, release=False):
     parallelism is present, we need to look for both naming schemes if
     we don't know if the checkpoint has pipeline or expert parallelism.
     """
+    print_rank_0(f"checkpoint path: {checkpoints_path}, iteration: {iteration}")
 
     # Look for checkpoint with no pipelining and no expert parallelism
     filename = get_checkpoint_name(checkpoints_path, iteration, release,
@@ -434,6 +435,7 @@ def _load_base_checkpoint(load_dir, rank0=False):
         sys.modules.pop('megatron.fp16.loss_scaler', None)
     except BaseException as e:
         print_rank_0('could not load the checkpoint')
+        print_rank_0(f"checkpoint name: {checkpoint_name}")
         print_rank_0(e)
         sys.exit()
 
