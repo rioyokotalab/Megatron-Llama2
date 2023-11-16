@@ -2,8 +2,8 @@
 
 set -e
 
-start=5000
-end=10000
+start=15000
+end=25000
 increment=5000
 
 tokenizer_path=/bb/llm/gaf51275/jalm/jalm-tokenizer-private/tokenizer/jalm_llama_okazaki_lab_cc_nfkc_16k_aligned_8/merged_tokenizer_sp/jalm_llama.model
