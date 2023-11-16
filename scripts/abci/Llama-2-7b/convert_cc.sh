@@ -22,7 +22,7 @@ source .env/bin/activate
 BASE_TENSOR_PARALLEL_SIZE=1   # fixed
 BASE_PIPELINE_PARALLEL_SIZE=1 # fixed
 
-ITERATION=4000
+ITERATION=8000
 FORMATTED_ITERATION=$(printf "%07d" $ITERATION)
 
 SAVE_DIR=/bb/llm/gaf51275/llama/from_megatron_hf_checkpoints/hf_checkpoints/Llama2-7b-base-default/okazaki_lab_cc/iter_${FORMATTED_ITERATION}
