@@ -1,6 +1,6 @@
 #!/bin/bash
 #$ -l rt_AF=32
-#$ -l h_rt=20:00:00:00
+#$ -l h_rt=10:00:00:00
 #$ -j y
 #$ -o outputs/llama-2-70b-base/32node/okazaki-lab-cc/
 #$ -cwd

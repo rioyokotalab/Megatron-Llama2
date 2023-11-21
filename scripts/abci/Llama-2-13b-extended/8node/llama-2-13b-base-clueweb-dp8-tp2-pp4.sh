@@ -1,6 +1,6 @@
 #!/bin/bash
 #$ -l rt_AF=8
-#$ -l h_rt=4:23:00:00
+#$ -l h_rt=8:00:00:00
 #$ -j y
 #$ -o outputs/llama-2-13b-base/clueweb/
 #$ -cwd
