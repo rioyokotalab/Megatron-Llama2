@@ -35,7 +35,7 @@ mkdir -p ${TARGET_CHECKPOINT_DIR}
 TOKENIZER_MODEL=/bb/llm/gaf51275/llama/huggingface-checkpoint/Llama-2-7b-hf/tokenizer.model
 
 # change latest_checkpointed_iteration.txt
-ITERATION=10000
+ITERATION=15000
 echo $ITERATION >${BASE_CHECKPOINT_DIR}/latest_checkpointed_iteration.txt
 
 # convert

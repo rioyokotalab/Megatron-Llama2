@@ -2,8 +2,8 @@
 
 set -e
 
-start=5000
-end=10000
+start=15000
+end=15000
 increment=5000
 
 tokenizer_path=/bb/llm/gaf51275/llama/huggingface-checkpoint/Llama-2-7b-hf/tokenizer.model
