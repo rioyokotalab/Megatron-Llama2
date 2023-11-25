@@ -1,8 +1,8 @@
 #!/bin/bash
-#$ -l rt_AF=2
-#$ -l h_rt=14:00:00:00
+#$ -l rt_AF=4
+#$ -l h_rt=10:00:00:00
 #$ -j y
-#$ -o outputs/llama-2-7b-base/2node/en-updated/
+#$ -o outputs/llama-2-7b-base/4node/en-updated/
 #$ -cwd
 
 # module load
@@ -71,7 +71,7 @@ GRAD_CLIP=1
 
 # model config
 TOKENIZER_MODEL=/bb/llm/gaf51275/jalm/jalm-tokenizer-private/tokenizer/jalm_llama_okazaki_lab_cc_nfkc_16k_aligned_8/merged_tokenizer_sp/jalm_llama.model
-CHECKPOINT_DIR=/bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-7b-chat-extended/okazaki_lab_cc/tp${TENSOR_PARALLEL_SIZE}-pp${PIPELINE_PARALLEL_SIZE}
+CHECKPOINT_DIR=/bb/llm/gaf51275/llama/llama-megatron-convert-checkpoint-hf/Llama-2-7b-extended/okazaki_lab_cc/tp${TENSOR_PARALLEL_SIZE}-pp${PIPELINE_PARALLEL_SIZE}
 CHECKPOINT_SAVE_DIR=/bb/llm/gaf51275/llama/checkpoints/Llama-2-7b-base-extended/okazaki_lab_cc-en-updated/tp2-pp2
 
 mkdir -p ${CHECKPOINT_SAVE_DIR}
