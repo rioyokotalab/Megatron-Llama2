@@ -1,6 +1,6 @@
 #!/bin/bash
 #$ -l rt_AF=16
-#$ -l h_rt=6:00:00:00
+#$ -l h_rt=6:15:00:00
 #$ -j y
 #$ -o outputs/llama-2-13b-base/llm-jp/
 #$ -cwd
