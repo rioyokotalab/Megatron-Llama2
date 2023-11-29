@@ -1,6 +1,6 @@
 #!/bin/bash
-#$ -l rt_AF=4
-#$ -l h_rt=9:00:00:00
+#$ -l rt_AF=8
+#$ -l h_rt=7:00:00:00
 #$ -j y
 #$ -o outputs/llama-2-7b-base/2node/
 #$ -cwd
