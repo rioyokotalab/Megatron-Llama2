@@ -1,5 +1,5 @@
 #!/bin/bash
-#$ -l rt_AF=1
+#$ -l rt_F=1
 #$ -l h_rt=5:00:00
 #$ -j y
 #$ -o outputs/change_tp_pp/
@@ -35,7 +35,7 @@ mkdir -p ${TARGET_CHECKPOINT_DIR}
 TOKENIZER_MODEL=/bb/llm/gaf51275/llama/huggingface-checkpoint/Llama-2-7b-hf/tokenizer.model
 
 # change latest_checkpointed_iteration.txt
-ITERATION=15000
+ITERATION=20000
 echo $ITERATION >${BASE_CHECKPOINT_DIR}/latest_checkpointed_iteration.txt
 
 # convert

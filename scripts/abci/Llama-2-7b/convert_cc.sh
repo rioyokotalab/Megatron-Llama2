@@ -1,5 +1,5 @@
 #!/bin/bash
-#$ -l rt_AF=1
+#$ -l rt_F=1
 #$ -l h_rt=5:00:00
 #$ -j y
 #$ -o outputs/convert/
@@ -22,7 +22,7 @@ source .env/bin/activate
 BASE_TENSOR_PARALLEL_SIZE=1   # fixed
 BASE_PIPELINE_PARALLEL_SIZE=1 # fixed
 
-ITERATION=15000
+ITERATION=20000
 FORMATTED_ITERATION=$(printf "%07d" $ITERATION)
 
 SAVE_DIR=/bb/llm/gaf51275/llama/from_megatron_hf_checkpoints/hf_checkpoints/Llama2-7b-base-default/okazaki_lab_cc/iter_${FORMATTED_ITERATION}
