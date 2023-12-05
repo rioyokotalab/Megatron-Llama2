@@ -370,17 +370,14 @@ def convert_checkpoint_from_megatron_to_transformers(args: argparse.Namespace) -
                 release = (latest_ckpt == "release")
                 if not release:
                     raise ValueError(f"Invalid latest checkpoint: {latest_ckpt}")
-            for sub_dir in sub_dirs:
-                if latest_ckpt in sub_dir:
-                    latest_ckpt = sub_dir
-                    break
+
     else:
         raise ValueError('Cannot find latest ckpt!')
-    possible_state_paths = [
-        os.path.join(args.load_path, latest_ckpt),
+    possible_state_paths: list[str] = [
         os.path.join(
-            args.load_path, latest_ckpt, 'iter_' + str(iteration) if not release else 'release'
+            args.load_path, f"iter_{iteration:07d}" if not release else 'release'  # type: ignore
         )]
+    print(f"DEBUG: possible_state_paths: {possible_state_paths}")
     state_path = None
     for p in possible_state_paths:
         if os.path.exists(p):
@@ -636,7 +633,7 @@ def convert_checkpoint_from_transformers_to_megatron(args):
 
     try:
         from megatron.tokenizer.tokenizer import _vocab_size_with_padding
-        from megatron.fs_utils import create_read_file_system
+        from megatron.fs_utils import create_read_file_system  # type: ignore
     except ModuleNotFoundError:
         print("Unable to import Megatron, please specify the path to Megatron using --megatron-path. Exiting.")
         exit(1)
