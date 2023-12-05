@@ -24,8 +24,8 @@ BASE_TENSOR_PARALLEL_SIZE=8
 BASE_PIPELINE_PARALLEL_SIZE=8
 
 # model config
-BASE_CHECKPOINT_DIR=/mnt/nfs/Users/kazuki/checkpoints/llama/megatron_checkpoints/Llama-2-70b-extended/tp${BASE_TENSOR_PARALLEL_SIZE}-pp${BASE_PIPELINE_PARALLEL_SIZE}
-TARGET_CHECKPOINT_DIR=/mnt/nfs/Users/kazuki/checkpoints/llama/megatron_checkpoints/Llama-2-70b-extended/tp${TARGET_TENSOR_PARALLEL_SIZE}-pp${TARGET_PIPELINE_PARALLEL_SIZE}
+BASE_CHECKPOINT_DIR=/home/kazuki/checkpoints/llama-2-70b-base-extended/tp${BASE_TENSOR_PARALLEL_SIZE}-pp${BASE_PIPELINE_PARALLEL_SIZE}
+TARGET_CHECKPOINT_DIR=/home/kazuki/checkpoints/llama-2-70b-base-extended/tp${TARGET_TENSOR_PARALLEL_SIZE}-pp${TARGET_PIPELINE_PARALLEL_SIZE}
 
 mkdir -p ${TARGET_CHECKPOINT_DIR}
 
@@ -33,7 +33,7 @@ mkdir -p ${TARGET_CHECKPOINT_DIR}
 TOKENIZER_MODEL=jalm-tokenizer-private/tokenizer/jalm_llama_okazaki_lab_cc_nfkc_16k_aligned_8/merged_tokenizer_sp/jalm_llama.model
 
 # change latest_checkpointed_iteration.txt
-ITERATION=2000
+ITERATION=5000
 echo $ITERATION >${BASE_CHECKPOINT_DIR}/latest_checkpointed_iteration.txt
 
 # convert
