@@ -254,6 +254,7 @@ def throughput_calculator(args, iteration_time, total_iterations):
     hidden_size: int = args.hidden_size
     num_layers: int = args.num_layers
     vocab_size: int = args.padded_vocab_size
+    intermediate_size: int = args.ffn_hidden_size
 
     # General TFLOPs formula (borrowed from Equation 3 in Section 5.1 of
     # https://arxiv.org/pdf/2104.04473.pdf).
@@ -269,7 +270,7 @@ def throughput_calculator(args, iteration_time, total_iterations):
     if hasattr(args, 'actual_seq_length'):
         seq_len: int = args.actual_seq_length
 
-    flops_per_iteration: float = (24 * checkpoint_activations_factor * batch_size * seq_len * num_layers * (hidden_size**2)) * (1. + (seq_len / (6. * hidden_size)) + (vocab_size / (16. * num_layers * hidden_size)))
+    flops_per_iteration: float = ((8 + 4 * (intermediate_size / hidden_size)) * checkpoint_activations_factor * batch_size * seq_len * num_layers * (hidden_size**2)) * (1. + (seq_len / (6. * hidden_size)) + (vocab_size / (16. * num_layers * hidden_size)))
     tflops: float = flops_per_iteration / (elapsed_time_per_iter * args.world_size * (10**12))
 
     return samples_per_second, tflops, samples_per_model, model_replica_count
