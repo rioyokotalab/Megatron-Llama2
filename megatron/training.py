@@ -691,6 +691,10 @@ def training_log(loss_dict, total_loss_dict, learning_rate, iteration,
             total_loss_dict[skipped_iters_key])
         log_string += ' number of nan iterations: {:3d} |'.format(
             total_loss_dict[nan_iters_key])
+        log_string += ' iteration time: {:.3f} s'.format(elapsed_time)
+        log_string += ' samples/sec: {:.1f} |'.format(samples_per_sec)
+        log_string += ' TFLOPS: {:.1f} |'.format(tflops)
+
         total_loss_dict[advanced_iters_key] = 0
         total_loss_dict[skipped_iters_key] = 0
         total_loss_dict[nan_iters_key] = 0
