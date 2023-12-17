@@ -1,0 +1,31 @@
+pybind11
+
+--find-links https://download.pytorch.org/whl/torch_stable.html
+torch==2.1.0+cu118
+torchvision==0.16.0+cu118
+
+six
+regex
+numpy
+
+deepspeed
+wandb
+tensorboard
+
+# mpirun
+mpi4py
+
+# tokenizer v2
+sentencepiece
+
+# tokenize
+nltk
+
+# flash-attn
+ninja
+packaging
+wheel
+
+# checkpoint convert
+transformers
+accelerate

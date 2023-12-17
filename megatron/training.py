@@ -4,8 +4,11 @@
 
 from datetime import datetime
 import math
+from pyexpat import model
 import sys
 import time
+import wandb
+import typing
 # The earliest we can measure the start time.
 _TRAIN_START_TIME = time.time()
 import torch
@@ -13,7 +16,7 @@ import torch
 from megatron import get_args
 from megatron import get_signal_handler
 from megatron import get_timers
-from megatron import get_tensorboard_writer
+from megatron import get_tensorboard_writer, get_wandb_writer
 from megatron import get_current_global_batch_size
 from megatron import get_num_microbatches
 from megatron import is_last_rank
@@ -489,6 +492,7 @@ def training_log(loss_dict, total_loss_dict, learning_rate, iteration,
     args = get_args()
     timers = get_timers()
     writer = get_tensorboard_writer()
+    wandb_writer = get_wandb_writer()
 
     # Advanced, skipped, and Nan iterations.
     advanced_iters_key = 'advanced iterations'
@@ -611,9 +615,51 @@ def training_log(loss_dict, total_loss_dict, learning_rate, iteration,
                 iteration,
             )
 
+    wandb_stats: dict[str, typing.Any] = {}
+    if wandb_writer and (iteration % args.tensorboard_log_interval == 0) and is_last_rank():
+        wandb_stats["utils/steps-vs-samples"] = args.consumed_train_samples
+
+        if args.log_learning_rate_to_tensorboard:
+            wandb_stats["utils/learning-rate"] = learning_rate
+
+        if args.log_batch_size_to_tensorboard:
+            wandb_stats["utils/batch-size"] = batch_size
+
+        for key in loss_dict:
+            wandb_stats[f"lm-loss-training/{key}"] = loss_dict[key]
+        if args.log_loss_scale_to_tensorboard:
+            wandb_stats["others/loss-scale"] = loss_scale
+        if grad_norm is not None:
+            wandb_stats["others/grad-norm"] = grad_norm
+        if num_zeros_in_grad is not None:
+            wandb_stats["others/num-zeros"] = num_zeros_in_grad
+        if params_norm is not None:
+            wandb_stats["others/params-norm"] = params_norm
+        if hasattr(args, 'actual_seq_length'):
+            wandb_stats["others/actual_seq_length"] = args.actual_seq_length
+
     if iteration % args.log_interval == 0:
         elapsed_time = timers('interval-time').elapsed(barrier=True)
         elapsed_time_per_iteration = elapsed_time / total_iterations
+
+        from megatron.utils import throughput_calculator
+
+        samples_per_sec, tflops, samples_per_model, model_replica_count = throughput_calculator(
+            args=args, iteration_time=elapsed_time, total_iterations=total_iterations
+        )
+        # Compute throughput.
+        samples_per_sec_per_replica = samples_per_sec / args.data_parallel_size
+        tokens_per_sec = samples_per_sec * args.seq_length
+        tokens_per_sec_per_replica = tokens_per_sec / args.data_parallel_size
+
+        wandb_stats["stats/tflops"] = tflops
+        wandb_stats["stats/samples_per_sec"] = samples_per_sec
+        wandb_stats["stats/samples_per_sec_per_replica"] = samples_per_sec_per_replica
+        wandb_stats["stats/tokens_per_sec"] = tokens_per_sec
+        wandb_stats["stats/tokens_per_sec_per_replica"] = tokens_per_sec_per_replica
+
+        if wandb_writer and is_last_rank():
+            wandb.log(wandb_stats, step=iteration)
         if writer:
             if args.log_timers_to_tensorboard:
                 writer.add_scalar('iteration-time',
@@ -645,6 +691,10 @@ def training_log(loss_dict, total_loss_dict, learning_rate, iteration,
             total_loss_dict[skipped_iters_key])
         log_string += ' number of nan iterations: {:3d} |'.format(
             total_loss_dict[nan_iters_key])
+        log_string += ' iteration time: {:.3f} s'.format(elapsed_time)
+        log_string += ' samples/sec: {:.1f} |'.format(samples_per_sec)
+        log_string += ' TFLOPS: {:.1f} |'.format(tflops)
+
         total_loss_dict[advanced_iters_key] = 0
         total_loss_dict[skipped_iters_key] = 0
         total_loss_dict[nan_iters_key] = 0
@@ -880,6 +930,7 @@ def evaluate(forward_step_func,
 
     return total_loss_dict, collected_non_loss_data
 
+
 def evaluate_and_print_results(prefix, forward_step_func,
                                data_iterator, model,
                                iteration, process_non_loss_data_func, config,
@@ -890,6 +941,7 @@ def evaluate_and_print_results(prefix, forward_step_func,
         writer = get_tensorboard_writer()
     else:
         writer = None
+    wandb_writer = get_wandb_writer()
 
     total_loss_dict, collected_non_loss_data = evaluate(
         forward_step_func, data_iterator, model,
@@ -911,6 +963,12 @@ def evaluate_and_print_results(prefix, forward_step_func,
                                   iteration)
                 writer.add_scalar('{} validation ppl vs samples'.format(key),
                                   ppl, args.consumed_train_samples)
+
+        if wandb_writer and is_last_rank():
+            wandb_stats = {}
+            wandb_stats[f'lm-loss-validation/{key}'] = total_loss_dict[key].item()
+            wandb_stats[f'lm-loss-validation/{key}_ppl'] = ppl
+            wandb.log(wandb_stats, step=iteration)
 
     if process_non_loss_data_func is not None and writer and is_last_rank():
         process_non_loss_data_func(collected_non_loss_data, iteration, writer)

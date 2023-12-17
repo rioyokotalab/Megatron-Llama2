@@ -85,14 +85,13 @@ def set_attn_state(args, layer, hf_layer):
     # Reshape loaded weights.
     tp = args.tensor_model_parallel_size
     nh = args.num_attention_heads // tp
-    ng = (args.num_query_groups if args.group_query_attention \
-        else args.num_attention_heads) // tp
+    ng = (args.num_query_groups if args.group_query_attention else args.num_attention_heads) // tp
     dim = args.kv_channels
     assert nh % ng == 0
 
     # Copy weights (re-order dimensions for Megatron).
     attn.query_key_value.weight.data.copy_(torch.cat([ 
-        hf_attn.q_proj.weight.reshape((ng, dim*nh//ng, -1)),
+        hf_attn.q_proj.weight.reshape((ng, dim * nh // ng, -1)),
         hf_attn.k_proj.weight.reshape((ng, dim, -1)),
         hf_attn.v_proj.weight.reshape((ng, dim, -1)),
     ], dim=1).reshape((-1, args.hidden_size)))

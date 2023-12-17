@@ -1,0 +1,38 @@
+{
+  "cSpell.words": [
+    "accum",
+    "arange",
+    "gelu",
+    "huggingface",
+    "layernorm",
+    "microbatches",
+    "OMPI",
+    "prescale",
+    "pretraining",
+    "Rampup",
+    "sentencepiece",
+    "seqlen",
+    "sharded",
+    "silu",
+    "swiglu",
+    "tensorstore",
+    "tflops",
+    "wqkv",
+    "zarr"
+  ],
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/.env/*/**": true,
+    "**/outputs/**": true,
+    "**/__pycache__/**": true,
+    "**/wandb/**": true,
+    "**/data/**": true,
+    "**/tensorboard/**": true,
+    "**/apex/**": true,
+    "**/hostfile/**": true,
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  }
+}

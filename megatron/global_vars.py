@@ -2,9 +2,11 @@
 
 """Megatron global variables."""
 
+import argparse
 import os
 import sys
 import torch
+import typing
 
 from megatron import dist_signal_handler
 from megatron.tokenizer import build_tokenizer
@@ -16,14 +18,16 @@ _GLOBAL_RETRO_ARGS = None
 _GLOBAL_NUM_MICROBATCHES_CALCULATOR = None
 _GLOBAL_TOKENIZER = None
 _GLOBAL_TENSORBOARD_WRITER = None
+_GLOBAL_WANDB_WRITER = None
 _GLOBAL_ADLR_AUTORESUME = None
 _GLOBAL_TIMERS = None
 _GLOBAL_SIGNAL_HANDLER = None
 
-def get_args():
+
+def get_args() -> argparse.Namespace:
     """Return arguments."""
     _ensure_var_is_initialized(_GLOBAL_ARGS, 'args')
-    return _GLOBAL_ARGS
+    return typing.cast(argparse.Namespace, _GLOBAL_ARGS)
 
 
 def get_retro_args():
@@ -56,6 +60,10 @@ def get_tensorboard_writer():
     return _GLOBAL_TENSORBOARD_WRITER
 
 
+def get_wandb_writer():
+    return _GLOBAL_WANDB_WRITER
+
+
 def get_adlr_autoresume():
     """ADLR autoresume object. It can be None so no need
     to check if it is initialized."""
@@ -79,8 +87,7 @@ def _set_signal_handler():
     _GLOBAL_SIGNAL_HANDLER = dist_signal_handler.DistributedSignalHandler().__enter__()
 
 
-
-def set_global_variables(args, build_tokenizer=True):
+def set_global_variables(args: argparse.Namespace, build_tokenizer=True) -> None:
     """Set args, tokenizer, tensorboard-writer, adlr-autoresume, and timers."""
 
     assert args is not None
@@ -92,14 +99,15 @@ def set_global_variables(args, build_tokenizer=True):
     if build_tokenizer:
         _ = _build_tokenizer(args)
     _set_tensorboard_writer(args)
+    _set_wandb_writer(args)
     _set_adlr_autoresume(args)
     _set_timers(args)
 
     if args.exit_signal_handler:
         _set_signal_handler()
-    
 
-def set_args(args):
+
+def set_args(args: argparse.Namespace) -> None:
     global _GLOBAL_ARGS
     _GLOBAL_ARGS = args
 
@@ -109,7 +117,7 @@ def set_retro_args(retro_args):
     _GLOBAL_RETRO_ARGS = retro_args
 
 
-def _build_num_microbatches_calculator(args):
+def _build_num_microbatches_calculator(args: argparse.Namespace) -> None:
 
     global _GLOBAL_NUM_MICROBATCHES_CALCULATOR
     _ensure_var_is_not_initialized(_GLOBAL_NUM_MICROBATCHES_CALCULATOR,
@@ -119,7 +127,7 @@ def _build_num_microbatches_calculator(args):
         args)
 
 
-def _build_tokenizer(args):
+def _build_tokenizer(args: argparse.Namespace):
     """Initialize tokenizer."""
     global _GLOBAL_TOKENIZER
     _ensure_var_is_not_initialized(_GLOBAL_TOKENIZER, 'tokenizer')
@@ -127,13 +135,13 @@ def _build_tokenizer(args):
     return _GLOBAL_TOKENIZER
 
 
-def rebuild_tokenizer(args):
+def rebuild_tokenizer(args: argparse.Namespace):
     global _GLOBAL_TOKENIZER
     _GLOBAL_TOKENIZER = None
     return _build_tokenizer(args)
 
 
-def _set_tensorboard_writer(args):
+def _set_tensorboard_writer(args: argparse.Namespace):
     """Set tensorboard writer."""
     global _GLOBAL_TENSORBOARD_WRITER
     _ensure_var_is_not_initialized(_GLOBAL_TENSORBOARD_WRITER,
@@ -153,7 +161,46 @@ def _set_tensorboard_writer(args):
                   'no TensorBoard logs will be written.', flush=True)
 
 
-def _set_adlr_autoresume(args):
+def _set_wandb_writer(args: argparse.Namespace) -> None:
+    """Set wandb writer."""
+    global _GLOBAL_WANDB_WRITER
+    _ensure_var_is_not_initialized(_GLOBAL_WANDB_WRITER, "wandb writer")  # type: ignore
+
+    if (
+        hasattr(args, "wandb_name")
+        and (args.wandb_name or args.wandb_id)
+        and args.rank == (args.world_size - 1)
+    ):
+        try:
+            import wandb
+            from datetime import datetime
+
+            now = datetime.now()
+            now = now.strftime("%Y-%m-%d-%H-%M-%S")
+            exp_name = args.wandb_name + "-" + now
+            entity: str = args.wandb_entity or "okoge"
+            wandb_input = {
+                "entity": entity,
+                "name": exp_name,
+                "config": args,
+                "project": args.wandb_project or "megatron-lm-3d",
+            }
+            if args.wandb_id is not None:
+                wandb_input["id"] = args.wandb_id
+                wandb_input["resume"] = "must"
+            wandb.init(**wandb_input)
+            _GLOBAL_WANDB_WRITER = True
+            print("> wandb ...")
+        except ModuleNotFoundError:
+            print(
+                "WARNING: wandb writing requested but is not "
+                "available (are you using PyTorch 1.1.0 or later?), "
+                "no wandb logs will be written.",
+                flush=True,
+            )
+
+
+def _set_adlr_autoresume(args: argparse.Namespace):
     """Initialize ADLR autoresume."""
     global _GLOBAL_ADLR_AUTORESUME
     _ensure_var_is_not_initialized(_GLOBAL_ADLR_AUTORESUME, 'adlr autoresume')
@@ -171,7 +218,7 @@ def _set_adlr_autoresume(args):
         _GLOBAL_ADLR_AUTORESUME = AutoResume
 
 
-def _set_timers(args):
+def _set_timers(args: argparse.Namespace):
     """Initialize timers."""
     global _GLOBAL_TIMERS
     _ensure_var_is_not_initialized(_GLOBAL_TIMERS, 'timers')

@@ -1,9 +1,7 @@
 # Copyright (c) 2023, NVIDIA CORPORATION. All rights reserved.
 
-import argparse
 import importlib
 import torch.multiprocessing as mp
-import os
 import sys
 
 # A loader is a python file with at least two functions
@@ -88,6 +86,7 @@ import sys
 # }
 # - "done"
 
+
 def load_plugin(plugin_type, name):
     module_name = f"{plugin_type}_{name}"
     try:
@@ -105,7 +104,8 @@ def load_plugin(plugin_type, name):
     print(f"Loaded {module_name} as the {plugin_type}.")
     return plugin
 
-def main():
+
+def main() -> None:
     import argparse
     parser = argparse.ArgumentParser(description="Megatron Checkpoint Utility Arguments",
                                      allow_abbrev=False, conflict_handler='resolve')

@@ -1,12 +1,16 @@
 # Copyright (c) 2022, NVIDIA CORPORATION. All rights reserved.
 
 """Megatron number of micro-batches calculators."""
-
+from __future__ import annotations
 from abc import ABC
 from abc import abstractmethod
+import argparse
+import typing
 
 
-def build_num_microbatches_calculator(args):
+def build_num_microbatches_calculator(
+        args: argparse.Namespace
+) -> typing.Union[ConstantNumMicroBatches, RampupBatchsizeNumMicroBatches]:
 
     # Constant num micro-batches.
     if args.rampup_batch_size is None:
