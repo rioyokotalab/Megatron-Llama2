@@ -147,7 +147,9 @@ def main() -> None:
 
     print("Waiting for saver to complete...")
     saver_proc.join()
-
+    if saver_proc.exitcode != 0:
+        print(f"Saver process failed with exit code {saver_proc.exitcode}")
+        exit(1)
 
 if __name__ == '__main__':
     main()
