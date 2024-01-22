@@ -414,17 +414,13 @@ def convert_checkpoint_from_megatron_to_transformers(args: argparse.Namespace) -
     else:
         dtype = torch.float32
 
-    num_kv_heads: int = megatron_args.num_attention_heads
-    if megatron_args.group_query_attention:
-        num_kv_heads = megatron_args.num_attention_heads / megatron_args.num_query_groups
-
     config = LlamaConfig(
         bos_token_id=1,
         eos_token_id=2,
         pretraining_tp=1,
         hidden_act='silu',
         hidden_size=megatron_args.hidden_size,
-        num_key_value_heads=num_kv_heads,
+        num_key_value_heads=megatron_args.num_query_groups if megatron_args.group_query_attention else megatron_args.num_attention_heads,
         intermediate_size=megatron_args.ffn_hidden_size,
         initializer_range=0.02,
         max_sequence_length=megatron_args.seq_length,
@@ -526,7 +522,7 @@ def convert_checkpoint_from_megatron_to_transformers(args: argparse.Namespace) -
 
                 wq, wk, wv = convert_wqkv(
                     qkv_w=params, layer_idx=layer_idx, n_heads=config.num_attention_heads,
-                    n_heads_kv=num_kv_heads,
+                    n_heads_kv=megatron_args.num_query_groups if megatron_args.group_query_attention else config.num_attention_heads,
                     tp_size=tp_size
                 )
 
